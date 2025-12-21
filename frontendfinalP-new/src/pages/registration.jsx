@@ -5,7 +5,7 @@ import '../styles/Auth.css';
 
 function Register() {
   const [formData, setFormData] = useState({
-    username: '',
+    fullName: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -45,7 +45,7 @@ function Register() {
     setLoading(true);
 
     try {
-      const response = await register(formData.username, formData.email, formData.password);
+      const response = await register(formData.fullName, formData.email, formData.password);
       
       // Redirect based on user role
       if (response.role === 'ADMIN') {
@@ -70,15 +70,15 @@ function Register() {
           {error && <div className="error-message">{error}</div>}
           
           <div className="form-group">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="fullName">FullName</label>
             <input
               type="text"
-              id="username"
-              name="username"
-              value={formData.username}
+              id="fullName"
+              name="fullName"
+              value={formData.fullName}
               onChange={handleChange}
               required
-              placeholder="Choose a username"
+              placeholder="Enter your full name"
             />
           </div>
 

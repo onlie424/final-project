@@ -38,7 +38,7 @@ function UserDashboard() {
 
         <div className="info-card">
           <h3>Account Information</h3>
-          <p><strong>Username:</strong> {user?.username}</p>
+          <p><strong>fullName:</strong> {user?.fullName}</p>
           <p><strong>Email:</strong> {user?.email}</p>
           <p><strong>Role:</strong> {user?.role}</p>
         </div>

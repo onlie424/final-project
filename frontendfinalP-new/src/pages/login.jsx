@@ -5,7 +5,7 @@ import '../styles/Auth.css';
 
 function Login() {
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: ''
   });
   const [error, setError] = useState('');
@@ -26,7 +26,7 @@ function Login() {
     setLoading(true);
 
     try {
-      const response = await login(formData.username, formData.password);
+      const response = await login(formData.email, formData.password);
       
       // Redirect based on user role
       if (response.role === 'ADMIN') {
@@ -51,15 +51,15 @@ function Login() {
           {error && <div className="error-message">{error}</div>}
           
           <div className="form-group">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="email">Email</label>
             <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
+              type="string"
+              id="email"
+              name="email"
+              value={formData.email}
               onChange={handleChange}
               required
-              placeholder="Enter your username"
+              placeholder="Enter your Email"
             />
           </div>
 

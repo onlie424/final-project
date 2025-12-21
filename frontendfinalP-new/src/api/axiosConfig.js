@@ -2,11 +2,10 @@ import axios from 'axios';
 
 // Create axios instance with base configuration
 const axiosInstance = axios.create({
-  baseURL: '/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+    baseURL: 'http://localhost:8080',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  
 
 // Request interceptor - adds JWT token to every request
 axiosInstance.interceptors.request.use(
