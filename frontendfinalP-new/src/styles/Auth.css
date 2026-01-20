@@ -10,7 +10,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background: linear-gradient(135deg, #667eea 0%, #f3f3f7 100%);
+    background: linear-gradient(135deg, #919194 0%, #f3f3f7 100%);
     padding: 20px;
   
   }
@@ -79,7 +79,7 @@
   
   .form-group input:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #9b9fb0;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
   }
   
@@ -105,7 +105,7 @@
   }
   
   .auth-button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #667eea 0%, #857d8d 100%);
     color: white;
     border: none;
     padding: 14px;
@@ -148,7 +148,7 @@
   
   .auth-footer a:hover {
     text-decoration: underline;
-    color: #764ba2;
+    color: #aaa0b4;
   }
   
   /* Responsive Design */

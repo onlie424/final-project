@@ -4,7 +4,7 @@
   }
   
   .dashboard-nav {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #a0a5c7 0%, #b7b6b8 100%);
     padding: 20px 40px;
     display: flex;
     justify-content: space-between;
@@ -105,7 +105,7 @@
   .info-card ul li:hover {
     background: linear-gradient(135deg, #e8e9ff 0%, #e0e2ff 100%);
     transform: translateX(5px);
-    border-left-color: #764ba2;
+    border-left-color: #98929f;
   }
   
   /* Responsive Design */
