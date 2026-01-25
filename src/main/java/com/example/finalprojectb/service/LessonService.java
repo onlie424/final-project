@@ -76,6 +76,32 @@ public class LessonService {
         return dto;
     }
 
+    @Transactional
+    public LessonDTO getLessonById(Long lessonId, Long userId) {
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new RuntimeException("Lesson not found with id: " + lessonId));
+
+        LessonDTO dto = convertToLessonDTO(lesson);
+
+        // Check if user has completed this lesson
+        if (userId != null) {
+            boolean isCompleted = lessonProgressRepository
+                    .findByUserIdAndLessonId(userId, lessonId)
+                    .map(lp -> "COMPLETED".equals(lp.getStatus()))
+                    .orElse(false);
+            dto.setIsCompleted(isCompleted);
+        }
+
+        return dto;
+    }
+
+    public List<LessonDTO> getLessonsByModule(Long moduleId) {
+        List<Lesson> lessons = lessonRepository.findByModuleIdOrderByOrderIndexAsc(moduleId);
+        return lessons.stream()
+                .map(this::convertToLessonDTO)
+                .collect(Collectors.toList());
+    }
+
     public LessonDTO updateLesson(Long lessonId, CreateLessonDTO dto) {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new RuntimeException("Lesson not found with id: " + lessonId));
@@ -92,7 +118,9 @@ public class LessonService {
     }
 
     public void deleteLesson(Long lessonId) {
-        lessonRepository.deleteById(lessonId);
+        Lesson lesson = lessonRepository.findById(lessonId)
+                .orElseThrow(() -> new RuntimeException("Lesson not found with id: " + lessonId));
+        lessonRepository.delete(lesson);
     }
 
     private LessonDTO convertToLessonDTO(Lesson lesson) {

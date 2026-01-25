@@ -1,8 +1,6 @@
 package com.example.finalprojectb.model;
 
 
-// ==================== QUIZ ATTEMPT ENTITY ====================
-
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -28,6 +26,10 @@ public class QuizAttempt {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
+
+    @Column(nullable = false)
+    private String status;
+
 
     @Column(name = "attempt_number")
     private Integer attemptNumber = 1;

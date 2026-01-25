@@ -34,6 +34,10 @@ public class QuestionResponse {
     @Column(name = "is_correct", nullable = false)
     private Boolean isCorrect = false;
 
+    @Column(name = "points_earned")
+    private Integer pointsEarned = 0;
+
+
     @Column(name = "time_spent_seconds")
     private Integer timeSpentSeconds;
 
