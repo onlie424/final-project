@@ -52,6 +52,13 @@ public class ModuleService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public ModuleDTO getModuleWithLessons(Long moduleId) {
+        Module module = moduleRepository.findById(moduleId)
+                .orElseThrow(() -> new RuntimeException("Module not found with id: " + moduleId));
+        return convertToModuleDTOWithLessons(module);
+    }
+
     public ModuleDTO updateModule(Long moduleId, CreateModuleDTO dto) {
         Module module = moduleRepository.findById(moduleId)
                 .orElseThrow(() -> new RuntimeException("Module not found with id: " + moduleId));
