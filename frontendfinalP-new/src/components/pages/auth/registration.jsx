@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { login } from '../services/authService';
+import { register } from '../../../services/authService';
 import '../styles/Auth.css';
 
-function Login() {
+function Register() {
   const [formData, setFormData] = useState({
+    fullName: '',
     email: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -20,13 +22,30 @@ function Login() {
     setError('');
   };
 
+  const validateForm = () => {
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return false;
+    }
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const response = await login(formData.email, formData.password);
+      const response = await register(formData.fullName, formData.email, formData.password);
       
       // Redirect based on user role
       if (response.role === 'ADMIN') {
@@ -44,22 +63,35 @@ function Login() {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <h2>Welcome Back</h2>
-        <p className="auth-subtitle">Login to your account</p>
+        <h2>Create Account</h2>
+        <p className="auth-subtitle">Sign up to get started</p>
         
         <form onSubmit={handleSubmit} className="auth-form">
           {error && <div className="error-message">{error}</div>}
           
           <div className="form-group">
+            <label htmlFor="fullName">FullName</label>
+            <input
+              type="text"
+              id="fullName"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
+              required
+              placeholder="Enter your full name"
+            />
+          </div>
+
+          <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
-              type="string"
+              type="email"
               id="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               required
-              placeholder="Enter your Email"
+              placeholder="Enter your email"
             />
           </div>
 
@@ -72,21 +104,34 @@ function Login() {
               value={formData.password}
               onChange={handleChange}
               required
-              placeholder="Enter your password"
+              placeholder="Create a password"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="confirmPassword">Confirm Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              placeholder="Confirm your password"
             />
           </div>
 
           <button type="submit" className="auth-button" disabled={loading}>
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Creating Account...' : 'Register'}
           </button>
         </form>
 
         <p className="auth-footer">
-          Don't have an account? <Link to="/register">Register here</Link>
+          Already have an account? <Link to="/login">Login here</Link>
         </p>
       </div>
     </div>
   );
 }
 
-export default Login;
+export default Register;

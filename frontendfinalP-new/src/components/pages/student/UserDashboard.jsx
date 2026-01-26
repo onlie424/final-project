@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { logout, getCurrentUser } from '../services/authService';
+import { logout, getCurrentUser } from '../../../services/authService';
 //import CurrentFocus from './dashboard/CurrentFocus';
 //import ProgressOverview from './dashboard/ProgressOverview';
 // import PersonalizedRecommendations from './dashboard/PersonalizedRecommendations';

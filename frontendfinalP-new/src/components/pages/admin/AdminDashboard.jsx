@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { logout, getCurrentUser } from '../services/authService';
+import { logout, getCurrentUser } from '../../../services/authService';
 import '../styles/Dashboard.css';
 
 function AdminDashboard() {
