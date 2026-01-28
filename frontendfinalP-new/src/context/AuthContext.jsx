@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { authService } from '../services/authService';
+
+import * as authService from '../services/authService';
 
 const AuthContext = createContext(null);
 
@@ -14,14 +15,15 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = async (credentials) => {
-    const data = await authService.login(credentials);
-    setUser({ userId: data.userId, role: data.role });
+  const login = async (email, password) => {
+    const data = await authService.login(email, password);
+    const currentUser = authService.getCurrentUser();
+    setUser(currentUser);
     return data;
   };
 
-  const register = async (userData) => {
-    const data = await authService.register(userData);
+  const register = async (fullName, email, password) => {
+    const data = await authService.register(fullName, email, password);
     return data;
   };
 
@@ -30,8 +32,8 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  const isAdmin = () => {
-    return user?.role === 'ADMIN';
+  const isAdminUser = () => {
+    return authService.isAdmin();
   };
 
   const value = {
@@ -39,8 +41,8 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    isAdmin,
-    isAuthenticated: !!user,
+    isAdmin: isAdminUser,
+    isAuthenticated: authService.isAuthenticated,
     loading,
   };
 

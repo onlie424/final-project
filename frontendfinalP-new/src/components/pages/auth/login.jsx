@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+
 import { login } from '../../../services/authService';
-import '../styles/Auth.css';
+
+import '../../../styles/Auth.css';
 
 function Login() {
   const [formData, setFormData] = useState({
