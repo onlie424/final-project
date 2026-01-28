@@ -1,0 +1,141 @@
+.activity-feed {
+  /* Inherits from dashboard-section */
+}
+
+.feed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.btn-view-all {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  color: #667eea;
+  border: 2px solid #667eea;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-view-all:hover {
+  background: #667eea;
+  color: white;
+}
+
+/* Activities List */
+.activities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f7fafc;
+  border-left: 4px solid #e2e8f0;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.activity-item:hover {
+  background: #edf2f7;
+  transform: translateX(4px);
+}
+
+/* Priority Styles */
+.priority-high {
+  border-left-color: #f56565;
+  background: linear-gradient(90deg, #fff5f5 0%, #f7fafc 100%);
+}
+
+.priority-medium {
+  border-left-color: #ed8936;
+  background: linear-gradient(90deg, #fffaf0 0%, #f7fafc 100%);
+}
+
+.priority-low {
+  border-left-color: #48bb78;
+  background: linear-gradient(90deg, #f0fff4 0%, #f7fafc 100%);
+}
+
+.activity-icon-wrapper {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.activity-icon {
+  font-size: 1.5rem;
+}
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0 0 0.25rem 0;
+}
+
+.activity-description {
+  font-size: 0.875rem;
+  color: #718096;
+  margin: 0;
+}
+
+.activity-time {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.time-text {
+  font-size: 0.75rem;
+  color: #a0aec0;
+  font-weight: 500;
+}
+
+/* No Activities */
+.no-activities {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #718096;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  display: block;
+  margin-top: 1rem;
+  opacity: 0.5;
+}
+
+@media (max-width: 768px) {
+  .feed-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .activity-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .activity-time {
+    text-align: left;
+  }
+}
