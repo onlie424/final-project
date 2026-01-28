@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
+
 import { logout, getCurrentUser } from '../../../services/authService';
-import '../styles/Dashboard.css';
+
+import '../../../styles/admin/Dashboard.css';
 
 function AdminDashboard() {
   const navigate = useNavigate();
