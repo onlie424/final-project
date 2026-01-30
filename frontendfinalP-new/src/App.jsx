@@ -1,10 +1,12 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import Login from './components/login';
-import Register from './components/registration';
-import AdminDashboard from './components/AdminDashboard';
-import UserDashboard from './components/UserDashboard';
-import { isAuthenticated, isAdmin, isUser, getUserRole, getCurrentUser } from './services/authService'; 
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
+import { isAuthenticated, isAdmin, isUser, getUserRole, getCurrentUser } from './services/authService';
+
+import Login from './components/pages/auth/login';
+import Register from './components/pages/auth/registration';
+import AdminDashboard from './components/pages/admin/Dashboard';
+import UserDashboard from './components/pages/student/Dashboard';
 import WelcomePage from './components/WelcomePage';
 
 // Protected Route Component
