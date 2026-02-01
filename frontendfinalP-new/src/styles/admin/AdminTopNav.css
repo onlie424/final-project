@@ -1,0 +1,106 @@
+/* ========================================
+   Admin Top Navigation Styles
+======================================== */
+
+.admin-topnav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  z-index: 100;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.topnav-left {
+  display: flex;
+  align-items: center;
+}
+
+.admin-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+}
+
+.logo-icon {
+  font-size: 1.75rem;
+}
+
+.logo-text {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+}
+
+.topnav-right {
+  display: flex;
+  align-items: center;
+}
+
+.admin-user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.admin-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.admin-user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-user-name {
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.admin-user-role {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+}
+
+.btn-logout {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-logout:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-topnav {
+    padding: 0 1rem;
+  }
+
+  .admin-user-details {
+    display: none;
+  }
+}

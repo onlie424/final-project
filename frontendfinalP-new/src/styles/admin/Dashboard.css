@@ -1,24 +1,111 @@
-.admin-dashboard {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 2rem;
-  background: #f7fafc;
-  min-height: calc(100vh - 70px);
+/* ========================================
+   Admin Dashboard - Main Layout Styles
+   This file contains only layout and main container styles
+======================================== */
+
+/* Import shared styles */
+@import './AdminShared.css';
+
+/* Admin Layout */
+.admin-layout {
+  min-height: 100vh;
+  background: #f0f2f5;
 }
 
+/* Loading State */
+.admin-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #f0f2f5;
+}
+
+.admin-loading .spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e0e0e0;
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.admin-loading p {
+  color: #666;
+  font-size: 1rem;
+}
+
+/* Main Content Area */
+.admin-main {
+  margin-left: 240px;
+  margin-top: 64px;
+  padding: 2rem;
+  min-height: calc(100vh - 64px);
+}
+
+/* Admin Header */
 .admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 2rem;
 }
 
-.admin-header h1 {
-  font-size: 2rem;
-  color: #1a202c;
+.header-content h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1f2937;
   margin: 0 0 0.5rem 0;
 }
 
-.admin-header p {
-  color: #718096;
+.header-content p {
+  color: #6b7280;
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Error Banner */
+.error-banner {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.error-banner p {
+  color: #dc2626;
   margin: 0;
 }
 
-/* Add more admin-specific styles as needed */
+.error-banner button {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-main {
+    margin-left: 0;
+    padding: 1rem;
+  }
+
+  .admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}
