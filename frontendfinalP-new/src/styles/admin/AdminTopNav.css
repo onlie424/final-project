@@ -36,7 +36,11 @@
 .logo-text {
   font-size: 1.25rem;
   font-weight: 700;
-  color: white;
+  margin-top: 6px;
+  background: linear-gradient(135deg, #64b5f6 0%, #e0e0e0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .topnav-right {

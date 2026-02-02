@@ -30,8 +30,14 @@
 .logo {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1a73e8;
   text-decoration: none;
+  background: linear-gradient(135deg, #4a90d9 0%, #1a1a2e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: flex;
+  align-items: center;
+  height: 38px;
 }
 
 .search-bar {
