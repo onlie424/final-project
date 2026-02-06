@@ -107,12 +107,13 @@ function AdminDashboard() {
   };
 
   const handleDeleteCourse = async (courseId) => {
-    if (window.confirm('Are you sure you want to delete this course?')) {
+    if (window.confirm('Are you sure you want to delete this course? This will also remove all enrollments, modules, and lessons.')) {
       try {
         await adminService.deleteCourse(courseId);
         fetchDashboardData();
       } catch (err) {
         console.error('Error deleting course:', err);
+        setError(err.response?.data?.message || 'Failed to delete course. Please try again.');
       }
     }
   };

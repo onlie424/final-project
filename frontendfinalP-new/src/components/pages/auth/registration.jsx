@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-
-import { register } from '../../../services/authService';
+import { useAuth } from '../../../context/AuthContext';
 
 import '../../../styles/Auth.css';
 
@@ -15,6 +14,7 @@ function Register() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
