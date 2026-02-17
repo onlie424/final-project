@@ -1,7 +1,7 @@
 import { getInitials } from '../../../../utils/helpers';
 import '../../../../styles/admin/AdminUsers.css';
 
-function AdminUsers({ users, stats, currentUserId, onUpdateRole, onDelete }) {
+function AdminUsers({ users, stats, currentUserId, onDelete }) {
   return (
     <div className="admin-card full-width">
       <div className="card-header">
@@ -52,22 +52,6 @@ function AdminUsers({ users, stats, currentUserId, onUpdateRole, onDelete }) {
                   </td>
                   <td>
                     <div className="action-buttons">
-                      {user.role === 'USER' ? (
-                        <button
-                          className="btn-action promote"
-                          onClick={() => onUpdateRole(user.id, 'ADMIN')}
-                        >
-                          Make Admin
-                        </button>
-                      ) : (
-                        <button
-                          className="btn-action demote"
-                          onClick={() => onUpdateRole(user.id, 'USER')}
-                          disabled={user.id === currentUserId}
-                        >
-                          Remove Admin
-                        </button>
-                      )}
                       <button
                         className="btn-action delete"
                         onClick={() => onDelete(user.id)}

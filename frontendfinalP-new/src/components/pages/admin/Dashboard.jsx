@@ -131,16 +131,6 @@ function AdminDashboard() {
     }
   };
 
-  const handleUpdateUserRole = async (userId, newRole) => {
-    try {
-      await userService.updateUserRole(userId, newRole);
-      fetchUsers();
-      fetchDashboardData();
-    } catch (err) {
-      console.error('Error updating user role:', err);
-    }
-  };
-
   // Render content based on active tab
   const renderContent = () => {
     switch (activeTab) {
@@ -168,7 +158,6 @@ function AdminDashboard() {
             users={users}
             stats={stats}
             currentUserId={user?.userId}
-            onUpdateRole={handleUpdateUserRole}
             onDelete={handleDeleteUser}
           />
         );
