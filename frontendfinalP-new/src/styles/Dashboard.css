@@ -30,8 +30,14 @@
 .logo {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1a73e8;
   text-decoration: none;
+  background: linear-gradient(135deg, #4a90d9 0%, #1a1a2e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: flex;
+  align-items: center;
+  height: 38px;
 }
 
 .search-bar {
@@ -50,6 +56,7 @@
   width: 100%;
   font-size: 0.95rem;
   margin-left: 0.5rem;
+  color: #1f2937;
 }
 
 .topnav-right {
@@ -453,6 +460,25 @@
   background: linear-gradient(90deg, #4caf50, #8bc34a);
   border-radius: 3px;
   transition: width 0.3s ease;
+}
+
+.start-learning-btn {
+  width: 100%;
+  margin-top: 0.75rem;
+  padding: 0.625rem 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.start-learning-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 /* Empty State */

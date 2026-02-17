@@ -19,6 +19,7 @@ export default function Dashboard() {
     totalLessons: 0,
     streak: 7,
   });
+  const [enrollingCourseId, setEnrollingCourseId] = useState(null);
 
   useEffect(() => {
     fetchDashboardData();
@@ -79,12 +80,41 @@ export default function Dashboard() {
     }
   };
 
+  const handleEnrollCourse = async (courseId) => {
+    console.log('Enrolling - User object:', user);
+    console.log('Enrolling - userId:', user?.userId);
+    console.log('Enrolling - courseId:', courseId);
+
+    if (!user?.userId) {
+      setError('Please log out and log back in to enroll in courses');
+      return;
+    }
+
+    try {
+      setEnrollingCourseId(courseId);
+      setError(null);
+      await enrollmentService.enrollInCourse(user.userId, courseId);
+      // Refresh dashboard data to show the newly enrolled course
+      await fetchDashboardData();
+    } catch (err) {
+      console.error('Error enrolling in course:', err);
+      const errorMessage = err.response?.data?.message || 'Failed to enroll in course. Please try again.';
+      setError(errorMessage);
+    } finally {
+      setEnrollingCourseId(null);
+    }
+  };
+
   const handleBrowseCourses = () => {
     navigate('/enroll');
   };
 
   const handleCourseClick = (courseId) => {
     navigate(`/courses/${courseId}`);
+  };
+
+  const handleStartLearning = (courseId) => {
+    navigate(`/classroom/${courseId}`);
   };
 
   const handleLogout = () => {
@@ -238,12 +268,11 @@ export default function Dashboard() {
           ) : (
             <div className="course-cards">
               {enrolledCourses.map((course) => (
-                <div
-                  key={course.id}
-                  className="course-card"
-                  onClick={() => handleCourseClick(course.id)}
-                >
-                  <div className="course-card-image">
+                <div key={course.id} className="course-card">
+                  <div
+                    className="course-card-image"
+                    onClick={() => handleCourseClick(course.id)}
+                  >
                     {course.thumbnailUrl ? (
                       <img src={course.thumbnailUrl} alt={course.title} />
                     ) : (
@@ -251,7 +280,12 @@ export default function Dashboard() {
                     )}
                   </div>
                   <div className="course-card-body">
-                    <h3 className="course-card-title">{course.title}</h3>
+                    <h3
+                      className="course-card-title"
+                      onClick={() => handleCourseClick(course.id)}
+                    >
+                      {course.title}
+                    </h3>
                     <p className="course-card-meta">
                       {course.totalLessons || 0} lessons • {course.estimatedHours || 0}h • {course.difficulty || 'Beginner'}
                     </p>
@@ -261,6 +295,12 @@ export default function Dashboard() {
                         style={{ width: `${course.progress || 0}%` }}
                       ></div>
                     </div>
+                    <button
+                      className="start-learning-btn"
+                      onClick={() => handleStartLearning(course.id)}
+                    >
+                      {course.progress > 0 ? 'Continue Learning' : 'Start Learning'}
+                    </button>
                   </div>
                 </div>
               ))}
@@ -283,7 +323,7 @@ export default function Dashboard() {
                 <div
                   key={course.id}
                   className="course-card"
-                  onClick={handleBrowseCourses}
+                  onClick={() => handleEnrollCourse(course.id)}
                 >
                   <div className="course-card-image" style={{
                     background: course.thumbnailUrl ? 'none' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
@@ -299,9 +339,9 @@ export default function Dashboard() {
                     <p className="course-card-meta">
                       {course.totalLessons || 0} lessons • {course.estimatedHours || 0}h • {course.difficulty || 'Beginner'}
                     </p>
-                    <div className="course-progress-bar">
-                      <div className="course-progress-fill" style={{ width: '0%' }}></div>
-                    </div>
+                    <span className="enroll-badge">
+                      {enrollingCourseId === course.id ? 'Enrolling...' : 'Click to Enroll'}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -324,7 +364,7 @@ export default function Dashboard() {
                 <div
                   key={course.id}
                   className="course-card"
-                  onClick={handleBrowseCourses}
+                  onClick={() => handleEnrollCourse(course.id)}
                 >
                   <div className="course-card-image" style={{
                     background: course.thumbnailUrl ? 'none' : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
@@ -340,7 +380,9 @@ export default function Dashboard() {
                     <p className="course-card-meta">
                       {course.totalLessons || 0} lessons • {course.estimatedHours || 0}h • {course.difficulty || 'Beginner'}
                     </p>
-                    <span className="enroll-badge">Click to Enroll</span>
+                    <span className="enroll-badge">
+                      {enrollingCourseId === course.id ? 'Enrolling...' : 'Click to Enroll'}
+                    </span>
                   </div>
                 </div>
               ))}

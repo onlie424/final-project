@@ -21,21 +21,22 @@ export const register = async (fullName, email, password) => {
     if (response.data && response.data.token) {
       const userData = {
         token: response.data.token,
+        userId: response.data.userId || response.data.id,
         email: response.data.email,
         fullName: response.data.fullName,
         role: response.data.role
       };
-      
+
       console.log('Saving to localStorage:', userData);
       localStorage.setItem('user', JSON.stringify(userData));
-      
+
       // Verify it was saved
       const saved = localStorage.getItem('user');
       console.log('Verified saved data:', saved);
     } else {
       console.error('Invalid response structure:', response.data);
     }
-    
+
     return response.data;
   } catch (error) {
     console.error('Registration error:', error);
@@ -71,21 +72,22 @@ export const login = async (email, password) => {
     if (response.data && response.data.token) {
       const userData = {
         token: response.data.token,
+        userId: response.data.userId || response.data.id,
         email: response.data.email,
         fullName: response.data.fullName,
         role: response.data.role
       };
-      
+
       console.log('Saving to localStorage:', userData);
       localStorage.setItem('user', JSON.stringify(userData));
-      
+
       // Verify it was saved
       const saved = localStorage.getItem('user');
       console.log('Verified saved data:', saved);
     } else {
       console.error('Invalid response structure:', response.data);
     }
-    
+
     return response.data;
   } catch (error) {
     console.error('Login error:', error);

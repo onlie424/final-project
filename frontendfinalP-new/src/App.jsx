@@ -6,7 +6,10 @@ import { isAuthenticated, isAdmin, isUser, getUserRole, getCurrentUser } from '.
 import Login from './components/pages/auth/login';
 import Register from './components/pages/auth/registration';
 import AdminDashboard from './components/pages/admin/Dashboard';
+import CourseCreate from './components/pages/admin/CourseCreate';
 import UserDashboard from './components/pages/student/Dashboard';
+import CourseDetail from './components/pages/student/CourseDetail';
+import Classroom from './components/pages/student/Classroom';
 import WelcomePage from './components/WelcomePage';
 
 // Protected Route Component
@@ -148,25 +151,63 @@ function App() {
         <Route path="/register" element={<Register />} />
         
         {/* Admin Dashboard Route */}
-        <Route 
-          path="/admin/dashboard" 
+        <Route
+          path="/admin/dashboard"
           element={
             <AdminRoute>
               <AdminDashboard />
             </AdminRoute>
-          } 
+          }
+        />
+
+        {/* Admin Create Course Route */}
+        <Route
+          path="/admin/courses/create"
+          element={
+            <AdminRoute>
+              <CourseCreate />
+            </AdminRoute>
+          }
         />
         
         {/* User Dashboard Route */}
-        <Route 
-          path="/user/dashboard" 
+        <Route
+          path="/user/dashboard"
           element={
             <UserRoute>
               <UserDashboard />
             </UserRoute>
-          } 
+          }
         />
-        
+
+        {/* Course Detail Route */}
+        <Route
+          path="/courses/:courseId"
+          element={
+            <ProtectedRoute>
+              <CourseDetail />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Classroom Routes */}
+        <Route
+          path="/classroom/:courseId"
+          element={
+            <ProtectedRoute>
+              <Classroom />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/classroom/:courseId/lesson/:lessonId"
+          element={
+            <ProtectedRoute>
+              <Classroom />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Root Path */}
         <Route path="/" element={<RootPathHandler />} />
         
