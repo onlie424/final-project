@@ -1,11 +1,16 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { adminService } from '../../../services/adminService';
+import { courseService } from '../../../services/courseService';
 import '../../../styles/admin/CourseCreate.css';
 
 function CourseCreate() {
   const navigate = useNavigate();
+  const { courseId } = useParams();
+  const isEditMode = !!courseId;
+
   const [loading, setLoading] = useState(false);
+  const [loadingCourse, setLoadingCourse] = useState(false);
   const [error, setError] = useState(null);
 
   // Course basic info
@@ -20,13 +25,60 @@ function CourseCreate() {
   // Modules with their lessons
   const [modules, setModules] = useState([]);
 
-  // Handle course field changes
+  // Load existing course data in edit mode
+  useEffect(() => {
+    if (isEditMode) {
+      loadCourseData();
+    }
+  }, [courseId]);
+
+  const loadCourseData = async () => {
+    try {
+      setLoadingCourse(true);
+      setError(null);
+
+      const course = await courseService.getCourseById(courseId);
+
+      setCourseData({
+        title: course.title || '',
+        description: course.description || '',
+        category: course.category || '',
+        difficulty: course.difficulty || 'BEGINNER',
+        thumbnailUrl: course.thumbnailUrl || '',
+      });
+
+      if (course.modules && course.modules.length > 0) {
+        const loadedModules = course.modules.map(m => ({
+          id: m.id,
+          serverId: m.id,
+          title: m.title || '',
+          description: m.description || '',
+          orderIndex: m.orderIndex || 1,
+          lessons: (m.lessons || []).map(l => ({
+            id: l.id,
+            serverId: l.id,
+            title: l.title || '',
+            contentType: l.contentType || 'VIDEO',
+            contentUrl: l.contentUrl || '',
+            contentText: l.contentText || '',
+            orderIndex: l.orderIndex || 1,
+          }))
+        }));
+        setModules(loadedModules);
+      }
+    } catch (err) {
+      console.error('Error loading course:', err);
+      setError('Failed to load course data.');
+    } finally {
+      setLoadingCourse(false);
+    }
+  };
+
   const handleCourseChange = (e) => {
     const { name, value } = e.target;
     setCourseData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Add a new module
   const addModule = () => {
     setModules(prev => [
       ...prev,
@@ -40,22 +92,25 @@ function CourseCreate() {
     ]);
   };
 
-  // Update module
   const updateModule = (moduleId, field, value) => {
     setModules(prev => prev.map(m =>
       m.id === moduleId ? { ...m, [field]: value } : m
     ));
   };
 
-  // Remove module
   const removeModule = (moduleId) => {
+    const module = modules.find(m => m.id === moduleId);
+    if (isEditMode && module?.serverId) {
+      adminService.deleteModule(module.serverId).catch(err => {
+        console.error('Error deleting module:', err);
+      });
+    }
     setModules(prev => {
       const filtered = prev.filter(m => m.id !== moduleId);
       return filtered.map((m, idx) => ({ ...m, orderIndex: idx + 1 }));
     });
   };
 
-  // Add lesson to a module
   const addLesson = (moduleId) => {
     setModules(prev => prev.map(m => {
       if (m.id === moduleId) {
@@ -78,7 +133,6 @@ function CourseCreate() {
     }));
   };
 
-  // Update lesson
   const updateLesson = (moduleId, lessonId, field, value) => {
     setModules(prev => prev.map(m => {
       if (m.id === moduleId) {
@@ -93,8 +147,14 @@ function CourseCreate() {
     }));
   };
 
-  // Remove lesson
   const removeLesson = (moduleId, lessonId) => {
+    const module = modules.find(m => m.id === moduleId);
+    const lesson = module?.lessons.find(l => l.id === lessonId);
+    if (isEditMode && lesson?.serverId) {
+      adminService.deleteLesson(lesson.serverId).catch(err => {
+        console.error('Error deleting lesson:', err);
+      });
+    }
     setModules(prev => prev.map(m => {
       if (m.id === moduleId) {
         const filteredLessons = m.lessons.filter(l => l.id !== lessonId);
@@ -107,7 +167,6 @@ function CourseCreate() {
     }));
   };
 
-  // Submit the course
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -125,62 +184,131 @@ function CourseCreate() {
       setLoading(true);
       setError(null);
 
-      // 1. Create the course
-      const createdCourse = await adminService.createCourse({
-        title: courseData.title,
-        description: courseData.description,
-        category: courseData.category || 'General',
-        difficulty: courseData.difficulty,
-        thumbnailUrl: courseData.thumbnailUrl,
-        isPublished: false
-      });
-      console.log('Created course response:', createdCourse);
-
-      // Handle both 'id' and 'courseId' field names from backend
-      const courseId = createdCourse.id || createdCourse.courseId;
-      console.log('Using courseId:', courseId);
-
-      // 2. Create modules and lessons
-      for (const module of modules) {
-        if (!module.title.trim()) continue;
-
-        const createdModule = await adminService.createModule({
-          courseId: courseId,
-          title: module.title,
-          description: module.description,
-          orderIndex: module.orderIndex
+      if (isEditMode) {
+        // Update existing course
+        await adminService.updateCourse(courseId, {
+          title: courseData.title,
+          description: courseData.description,
+          category: courseData.category || 'General',
+          difficulty: courseData.difficulty,
+          thumbnailUrl: courseData.thumbnailUrl,
         });
-        console.log('Created module response:', createdModule);
 
-        // Handle both 'id' and 'moduleId' field names from backend
-        const moduleId = createdModule.id || createdModule.moduleId;
-        console.log('Using moduleId:', moduleId);
+        for (const module of modules) {
+          if (!module.title.trim()) continue;
 
-        // Create lessons for this module
-        for (const lesson of module.lessons) {
-          if (!lesson.title.trim()) continue;
+          if (module.serverId) {
+            await adminService.updateModule(module.serverId, {
+              courseId: Number(courseId),
+              title: module.title,
+              description: module.description,
+              orderIndex: module.orderIndex
+            });
 
-          console.log('Creating lesson with moduleId:', moduleId);
-          const createdLesson = await adminService.createLesson({
-            moduleId: moduleId,
-            title: lesson.title,
-            contentType: lesson.contentType || 'VIDEO',
-            contentUrl: lesson.contentUrl,
-            contentText: lesson.contentText,
-            orderIndex: lesson.orderIndex
+            for (const lesson of module.lessons) {
+              if (!lesson.title.trim()) continue;
+
+              if (lesson.serverId) {
+                await adminService.updateLesson(lesson.serverId, {
+                  moduleId: module.serverId,
+                  title: lesson.title,
+                  contentType: lesson.contentType || 'VIDEO',
+                  contentUrl: lesson.contentUrl,
+                  contentText: lesson.contentText,
+                  orderIndex: lesson.orderIndex
+                });
+              } else {
+                await adminService.createLesson({
+                  moduleId: module.serverId,
+                  title: lesson.title,
+                  contentType: lesson.contentType || 'VIDEO',
+                  contentUrl: lesson.contentUrl,
+                  contentText: lesson.contentText,
+                  orderIndex: lesson.orderIndex
+                });
+              }
+            }
+          } else {
+            const createdModule = await adminService.createModule({
+              courseId: Number(courseId),
+              title: module.title,
+              description: module.description,
+              orderIndex: module.orderIndex
+            });
+
+            const newModuleId = createdModule.id || createdModule.moduleId;
+
+            for (const lesson of module.lessons) {
+              if (!lesson.title.trim()) continue;
+              await adminService.createLesson({
+                moduleId: newModuleId,
+                title: lesson.title,
+                contentType: lesson.contentType || 'VIDEO',
+                contentUrl: lesson.contentUrl,
+                contentText: lesson.contentText,
+                orderIndex: lesson.orderIndex
+              });
+            }
+          }
+        }
+      } else {
+        // Create new course
+        const createdCourse = await adminService.createCourse({
+          title: courseData.title,
+          description: courseData.description,
+          category: courseData.category || 'General',
+          difficulty: courseData.difficulty,
+          thumbnailUrl: courseData.thumbnailUrl,
+          isPublished: false
+        });
+
+        const newCourseId = createdCourse.id || createdCourse.courseId;
+
+        for (const module of modules) {
+          if (!module.title.trim()) continue;
+
+          const createdModule = await adminService.createModule({
+            courseId: newCourseId,
+            title: module.title,
+            description: module.description,
+            orderIndex: module.orderIndex
           });
+
+          const newModuleId = createdModule.id || createdModule.moduleId;
+
+          for (const lesson of module.lessons) {
+            if (!lesson.title.trim()) continue;
+            await adminService.createLesson({
+              moduleId: newModuleId,
+              title: lesson.title,
+              contentType: lesson.contentType || 'VIDEO',
+              contentUrl: lesson.contentUrl,
+              contentText: lesson.contentText,
+              orderIndex: lesson.orderIndex
+            });
+          }
         }
       }
 
-      // Navigate back to admin dashboard
       navigate('/admin/dashboard');
     } catch (err) {
-      console.error('Error creating course:', err);
-      setError(err.response?.data?.message || 'Failed to create course. Please try again.');
+      console.error('Error saving course:', err);
+      setError(err.response?.data?.message || 'Failed to save course. Please try again.');
     } finally {
       setLoading(false);
     }
   };
+
+  if (loadingCourse) {
+    return (
+      <div className="course-create-page">
+        <div className="dashboard-loading">
+          <div className="spinner"></div>
+          <p>Loading course data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="course-create-page">
@@ -188,7 +316,7 @@ function CourseCreate() {
         <button className="btn-back" onClick={() => navigate('/admin/dashboard')}>
           ← Back to Dashboard
         </button>
-        <h1>Create New Course</h1>
+        <h1>{isEditMode ? 'Edit Course' : 'Create New Course'}</h1>
       </div>
 
       {error && (
@@ -423,7 +551,10 @@ function CourseCreate() {
             className="btn-submit"
             disabled={loading}
           >
-            {loading ? 'Creating Course...' : 'Create Course'}
+            {loading
+              ? (isEditMode ? 'Saving Changes...' : 'Creating Course...')
+              : (isEditMode ? 'Save Changes' : 'Create Course')
+            }
           </button>
         </div>
       </form>

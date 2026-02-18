@@ -12,12 +12,11 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [allCourses, setAllCourses] = useState([]);
-  const [currentCourse, setCurrentCourse] = useState(null);
   const [stats, setStats] = useState({
     totalCoursesEnrolled: 0,
     completedLessons: 0,
     totalLessons: 0,
-    streak: 7,
+    streak: 0,
   });
   const [enrollingCourseId, setEnrollingCourseId] = useState(null);
 
@@ -54,17 +53,13 @@ export default function Dashboard() {
           const validCourses = enrolledCoursesData.filter(c => c !== null);
           setEnrolledCourses(validCourses);
 
-          if (validCourses.length > 0) {
-            setCurrentCourse(validCourses[0]);
-          }
-
           // Calculate stats from real data
           const totalLessons = validCourses.reduce((sum, c) => sum + (c.totalLessons || 0), 0);
           setStats({
             totalCoursesEnrolled: validCourses.length,
-            completedLessons: 0, // This would come from progress tracking
+            completedLessons: 0,
             totalLessons: totalLessons,
-            streak: 7,
+            streak: user?.loginStreak || 0,
           });
         } catch (enrollError) {
           console.log('No enrollments found or error:', enrollError);
@@ -81,10 +76,6 @@ export default function Dashboard() {
   };
 
   const handleEnrollCourse = async (courseId) => {
-    console.log('Enrolling - User object:', user);
-    console.log('Enrolling - userId:', user?.userId);
-    console.log('Enrolling - courseId:', courseId);
-
     if (!user?.userId) {
       setError('Please log out and log back in to enroll in courses');
       return;
@@ -94,7 +85,6 @@ export default function Dashboard() {
       setEnrollingCourseId(courseId);
       setError(null);
       await enrollmentService.enrollInCourse(user.userId, courseId);
-      // Refresh dashboard data to show the newly enrolled course
       await fetchDashboardData();
     } catch (err) {
       console.error('Error enrolling in course:', err);
@@ -103,10 +93,6 @@ export default function Dashboard() {
     } finally {
       setEnrollingCourseId(null);
     }
-  };
-
-  const handleBrowseCourses = () => {
-    navigate('/enroll');
   };
 
   const handleCourseClick = (courseId) => {
@@ -146,10 +132,6 @@ export default function Dashboard() {
       <nav className="dashboard-topnav">
         <div className="topnav-left">
           <a href="/" className="logo">BrainPath</a>
-          <div className="search-bar">
-            <span>🔍</span>
-            <input type="text" placeholder="Search courses..." />
-          </div>
         </div>
         <div className="topnav-right">
           <div className="user-info" onClick={handleLogout}>
@@ -162,51 +144,45 @@ export default function Dashboard() {
         </div>
       </nav>
 
-      {/* Sidebar - Show only if user has enrolled courses */}
-      {currentCourse && (
+      {/* Sidebar - Show all enrolled courses */}
+      {enrolledCourses.length > 0 && (
         <aside className="dashboard-sidebar">
           <div className="sidebar-header">
-            <div className="course-icon">📚</div>
-            <h2 className="course-title">{currentCourse.title}</h2>
-            <div className="course-breadcrumb">
-              <span>{currentCourse.category || 'COURSE'}</span>
-              <span>›</span>
-              <span>{currentCourse.difficulty || 'BEGINNER'}</span>
-            </div>
+            <h2 className="sidebar-title">My Courses</h2>
+            <span className="sidebar-count">{enrolledCourses.length}</span>
           </div>
 
-          <div className="lesson-navigator">
-            <div className="current-lesson">
-              <div className="current-lesson-label">
-                {currentCourse.totalLessons || 0} Lessons
+          <div className="sidebar-courses-list">
+            {enrolledCourses.map((course) => (
+              <div key={course.id} className="sidebar-course-item">
+                <div
+                  className="sidebar-course-info"
+                  onClick={() => handleCourseClick(course.id)}
+                >
+                  <div className="sidebar-course-icon">📚</div>
+                  <div className="sidebar-course-text">
+                    <p className="sidebar-course-name">{course.title}</p>
+                    <span className="sidebar-course-meta">
+                      {course.totalLessons || 0} lessons · {course.difficulty || 'Beginner'}
+                    </span>
+                  </div>
+                </div>
+                <div className="sidebar-course-actions">
+                  <button
+                    className="sidebar-btn-learn"
+                    onClick={() => handleStartLearning(course.id)}
+                  >
+                    {course.progress > 0 ? 'Continue' : 'Start'}
+                  </button>
+                </div>
               </div>
-              <div className="current-lesson-title">
-                {currentCourse.estimatedHours || 0}h estimated
-              </div>
-            </div>
-          </div>
-
-          <div className="lesson-list">
-            <div className="lesson-item active">
-              <div className="lesson-icon video">▶</div>
-              <div className="lesson-info">
-                <p className="lesson-title">Continue Learning</p>
-                <span className="lesson-meta">Start where you left off</span>
-              </div>
-            </div>
-            <div className="lesson-item" onClick={() => handleCourseClick(currentCourse.id)}>
-              <div className="lesson-icon article">📄</div>
-              <div className="lesson-info">
-                <p className="lesson-title">View Course Details</p>
-                <span className="lesson-meta">See all modules and lessons</span>
-              </div>
-            </div>
+            ))}
           </div>
         </aside>
       )}
 
       {/* Main Content */}
-      <main className="dashboard-main" style={!currentCourse ? { marginLeft: 0, maxWidth: '100%' } : {}}>
+      <main className="dashboard-main" style={enrolledCourses.length === 0 ? { marginLeft: 0, maxWidth: '100%' } : {}}>
         {/* Error Message */}
         {error && (
           <div className="error-banner">
@@ -251,9 +227,6 @@ export default function Dashboard() {
         <div className="content-section">
           <div className="section-header">
             <h2 className="section-title">My Enrolled Courses</h2>
-            <span className="section-action" onClick={handleBrowseCourses}>
-              Browse more courses →
-            </span>
           </div>
 
           {enrolledCourses.length === 0 ? (
@@ -261,9 +234,6 @@ export default function Dashboard() {
               <div className="empty-state-icon">📚</div>
               <h3>No Enrolled Courses Yet</h3>
               <p>Explore our course catalog and start learning today!</p>
-              <button className="btn-primary" onClick={handleBrowseCourses}>
-                Browse Courses
-              </button>
             </div>
           ) : (
             <div className="course-cards">
@@ -287,7 +257,7 @@ export default function Dashboard() {
                       {course.title}
                     </h3>
                     <p className="course-card-meta">
-                      {course.totalLessons || 0} lessons • {course.estimatedHours || 0}h • {course.difficulty || 'Beginner'}
+                      {course.totalLessons || 0} lessons · {course.estimatedHours || 0}h · {course.difficulty || 'Beginner'}
                     </p>
                     <div className="course-progress-bar">
                       <div
@@ -313,18 +283,11 @@ export default function Dashboard() {
           <div className="content-section">
             <div className="section-header">
               <h2 className="section-title">Recommended for You</h2>
-              <span className="section-action" onClick={handleBrowseCourses}>
-                See all →
-              </span>
             </div>
 
             <div className="course-cards">
               {recommendedCourses.map((course) => (
-                <div
-                  key={course.id}
-                  className="course-card"
-                  onClick={() => handleEnrollCourse(course.id)}
-                >
+                <div key={course.id} className="course-card">
                   <div className="course-card-image" style={{
                     background: course.thumbnailUrl ? 'none' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
                   }}>
@@ -337,11 +300,15 @@ export default function Dashboard() {
                   <div className="course-card-body">
                     <h3 className="course-card-title">{course.title}</h3>
                     <p className="course-card-meta">
-                      {course.totalLessons || 0} lessons • {course.estimatedHours || 0}h • {course.difficulty || 'Beginner'}
+                      {course.totalLessons || 0} lessons · {course.estimatedHours || 0}h · {course.difficulty || 'Beginner'}
                     </p>
-                    <span className="enroll-badge">
-                      {enrollingCourseId === course.id ? 'Enrolling...' : 'Click to Enroll'}
-                    </span>
+                    <button
+                      className="enroll-badge-btn"
+                      onClick={() => handleEnrollCourse(course.id)}
+                      disabled={enrollingCourseId === course.id}
+                    >
+                      {enrollingCourseId === course.id ? 'Enrolling...' : 'Enroll Now'}
+                    </button>
                   </div>
                 </div>
               ))}
@@ -349,23 +316,16 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* All Available Courses */}
+        {/* All Available Courses (when user has no enrollments) */}
         {allCourses.length > 0 && enrolledCourses.length === 0 && (
           <div className="content-section">
             <div className="section-header">
               <h2 className="section-title">Available Courses</h2>
-              <span className="section-action" onClick={handleBrowseCourses}>
-                Enroll now →
-              </span>
             </div>
 
             <div className="course-cards">
-              {allCourses.slice(0, 4).map((course) => (
-                <div
-                  key={course.id}
-                  className="course-card"
-                  onClick={() => handleEnrollCourse(course.id)}
-                >
+              {allCourses.slice(0, 6).map((course) => (
+                <div key={course.id} className="course-card">
                   <div className="course-card-image" style={{
                     background: course.thumbnailUrl ? 'none' : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
                   }}>
@@ -378,11 +338,15 @@ export default function Dashboard() {
                   <div className="course-card-body">
                     <h3 className="course-card-title">{course.title}</h3>
                     <p className="course-card-meta">
-                      {course.totalLessons || 0} lessons • {course.estimatedHours || 0}h • {course.difficulty || 'Beginner'}
+                      {course.totalLessons || 0} lessons · {course.estimatedHours || 0}h · {course.difficulty || 'Beginner'}
                     </p>
-                    <span className="enroll-badge">
-                      {enrollingCourseId === course.id ? 'Enrolling...' : 'Click to Enroll'}
-                    </span>
+                    <button
+                      className="enroll-badge-btn"
+                      onClick={() => handleEnrollCourse(course.id)}
+                      disabled={enrollingCourseId === course.id}
+                    >
+                      {enrollingCourseId === course.id ? 'Enrolling...' : 'Enroll Now'}
+                    </button>
                   </div>
                 </div>
               ))}

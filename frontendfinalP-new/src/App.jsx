@@ -169,6 +169,16 @@ function App() {
             </AdminRoute>
           }
         />
+
+        {/* Admin Edit Course Route */}
+        <Route
+          path="/admin/courses/:courseId/edit"
+          element={
+            <AdminRoute>
+              <CourseCreate />
+            </AdminRoute>
+          }
+        />
         
         {/* User Dashboard Route */}
         <Route

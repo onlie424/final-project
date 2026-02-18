@@ -67,6 +67,10 @@ export default function CourseDetail() {
     navigate('/user/dashboard');
   };
 
+  const handleStartLearning = () => {
+    navigate(`/classroom/${courseId}`);
+  };
+
   if (loading) {
     return (
       <div className="course-detail-loading">
@@ -76,7 +80,7 @@ export default function CourseDetail() {
     );
   }
 
-  if (error) {
+  if (error && !course) {
     return (
       <div className="course-detail-error">
         <p>{error}</p>
@@ -94,113 +98,127 @@ export default function CourseDetail() {
     );
   }
 
+  const totalLessons = course.modules
+    ? course.modules.reduce((sum, m) => sum + (m.lessons?.length || 0), 0)
+    : (course.totalLessons || 0);
+
   return (
     <div className="course-detail-page">
-      {/* Header */}
-      <header className="course-detail-header">
+      {/* Top Bar */}
+      <header className="course-detail-topbar">
         <button className="back-btn" onClick={handleBack}>
-          Back to Dashboard
+          ← Back to Dashboard
         </button>
+        <span className="topbar-title">Course Details</span>
       </header>
 
-      {/* Course Hero Section */}
-      <div className="course-hero">
-        <div className="course-hero-content">
-          <div className="course-category">{course.category || 'Course'}</div>
-          <h1 className="course-title">{course.title}</h1>
-          <p className="course-description">{course.description}</p>
+      {error && (
+        <div className="course-detail-alert">
+          <p>{error}</p>
+        </div>
+      )}
 
-          <div className="course-meta">
-            <span className="meta-item">
-              <strong>{course.totalLessons || 0}</strong> Lessons
-            </span>
-            <span className="meta-item">
-              <strong>{course.estimatedHours || 0}</strong> Hours
-            </span>
-            <span className="meta-item">
-              <strong>{course.difficulty || 'Beginner'}</strong>
-            </span>
+      <div className="course-detail-content">
+        {/* Course Info Card */}
+        <div className="course-info-card">
+          <div className="course-info-main">
+            <div className="course-badges">
+              <span className="badge badge-category">{course.category || 'General'}</span>
+              <span className={`badge badge-difficulty ${(course.difficulty || 'beginner').toLowerCase()}`}>
+                {course.difficulty || 'Beginner'}
+              </span>
+            </div>
+
+            <h1 className="course-detail-title">{course.title}</h1>
+            <p className="course-detail-description">{course.description}</p>
+
+            <div className="course-stats">
+              <div className="stat-item">
+                <span className="stat-value">{totalLessons}</span>
+                <span className="stat-label">Lessons</span>
+              </div>
+              <div className="stat-divider"></div>
+              <div className="stat-item">
+                <span className="stat-value">{course.modules?.length || 0}</span>
+                <span className="stat-label">Modules</span>
+              </div>
+              <div className="stat-divider"></div>
+              <div className="stat-item">
+                <span className="stat-value">{course.estimatedHours || 0}h</span>
+                <span className="stat-label">Estimated</span>
+              </div>
+            </div>
+
+            <div className="course-actions">
+              {isEnrolled ? (
+                <>
+                  <span className="enrolled-status">Enrolled</span>
+                  <button className="btn-start-learning" onClick={handleStartLearning}>
+                    Go to Classroom
+                  </button>
+                </>
+              ) : (
+                <button
+                  className="btn-enroll"
+                  onClick={handleEnroll}
+                  disabled={enrolling}
+                >
+                  {enrolling ? 'Enrolling...' : 'Enroll in this Course'}
+                </button>
+              )}
+            </div>
           </div>
 
-          {isEnrolled ? (
-            <div className="enrolled-badge">You are enrolled in this course</div>
-          ) : (
-            <button
-              className="enroll-btn"
-              onClick={handleEnroll}
-              disabled={enrolling}
-            >
-              {enrolling ? 'Enrolling...' : 'Enroll Now'}
-            </button>
+          {course.thumbnailUrl && (
+            <div className="course-info-image">
+              <img src={course.thumbnailUrl} alt={course.title} />
+            </div>
           )}
         </div>
 
-        <div className="course-hero-image">
-          {course.thumbnailUrl ? (
-            <img src={course.thumbnailUrl} alt={course.title} />
-          ) : (
-            <div className="placeholder-image">Course</div>
-          )}
-        </div>
-      </div>
-
-      {/* Course Content */}
-      <div className="course-content">
-        {/* About Section */}
-        <section className="content-section">
-          <h2>About this Course</h2>
-          <p>{course.description || 'No description available.'}</p>
-        </section>
-
-        {/* What You'll Learn */}
-        {course.learningObjectives && course.learningObjectives.length > 0 && (
-          <section className="content-section">
-            <h2>What You'll Learn</h2>
-            <ul className="objectives-list">
-              {course.learningObjectives.map((objective, index) => (
-                <li key={index}>{objective}</li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {/* Modules Section */}
+        {/* Modules & Lessons */}
         {course.modules && course.modules.length > 0 && (
-          <section className="content-section">
-            <h2>Course Modules</h2>
-            <div className="modules-list">
+          <div className="course-modules-section">
+            <h2 className="section-heading">Course Content</h2>
+            <p className="section-subheading">
+              {course.modules.length} modules &middot; {totalLessons} lessons
+            </p>
+
+            <div className="modules-accordion">
               {course.modules.map((module, index) => (
-                <div key={module.id || index} className="module-card">
-                  <div className="module-header">
-                    <span className="module-number">Module {index + 1}</span>
-                    <h3 className="module-title">{module.title}</h3>
+                <div key={module.id || index} className="module-accordion-item">
+                  <div className="module-accordion-header">
+                    <div className="module-accordion-left">
+                      <span className="module-index">{index + 1}</span>
+                      <div>
+                        <h3 className="module-acc-title">{module.title}</h3>
+                        {module.description && (
+                          <p className="module-acc-desc">{module.description}</p>
+                        )}
+                      </div>
+                    </div>
+                    <span className="module-lesson-count">
+                      {module.lessons?.length || 0} lessons
+                    </span>
                   </div>
-                  <p className="module-description">{module.description}</p>
-                  {module.lessons && (
-                    <div className="module-lessons">
-                      <span>{module.lessons.length} lessons</span>
+
+                  {module.lessons && module.lessons.length > 0 && (
+                    <div className="module-lessons-list">
+                      {module.lessons.map((lesson, lIndex) => (
+                        <div key={lesson.id || lIndex} className="lesson-list-item">
+                          <span className="lesson-type-icon">
+                            {lesson.contentType === 'VIDEO' ? '▶' :
+                             lesson.contentType === 'PDF' ? '📄' : '📝'}
+                          </span>
+                          <span className="lesson-list-title">{lesson.title}</span>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
               ))}
             </div>
-          </section>
-        )}
-
-        {/* Instructor Section */}
-        {course.instructor && (
-          <section className="content-section">
-            <h2>Instructor</h2>
-            <div className="instructor-card">
-              <div className="instructor-avatar">
-                {course.instructor.name?.charAt(0) || 'I'}
-              </div>
-              <div className="instructor-info">
-                <h3>{course.instructor.name}</h3>
-                <p>{course.instructor.bio}</p>
-              </div>
-            </div>
-          </section>
+          </div>
         )}
       </div>
     </div>
