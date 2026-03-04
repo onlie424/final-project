@@ -18,7 +18,7 @@ public class QuizService {
     private QuizRepository quizRepository;
 
     @Autowired
-    private LessonRepository lessonRepository;
+    private ModuleRepository moduleRepository;
 
     @Autowired
     private QuestionRepository questionRepository;
@@ -36,18 +36,27 @@ public class QuizService {
     private UserRepository userRepository;
 
     public QuizDTO createQuiz(CreateQuizDTO dto) {
-        Lesson lesson = lessonRepository.findById(dto.getLessonId())
-                .orElseThrow(() -> new RuntimeException("Lesson not found with id: " + dto.getLessonId()));
+        Module module = moduleRepository.findById(dto.getModuleId())
+                .orElseThrow(() -> new RuntimeException("Module not found with id: " + dto.getModuleId()));
 
         Quiz quiz = new Quiz();
-        quiz.setLesson(lesson);
+        quiz.setModule(module);
         quiz.setTitle(dto.getTitle());
         quiz.setDescription(dto.getDescription());
         quiz.setPassingScore(dto.getPassingScore());
         quiz.setTimeLimitMinutes(dto.getTimeLimitMinutes());
 
+        // Set order index based on existing quizzes in the module
+        List<Quiz> existingQuizzes = quizRepository.findByModuleIdOrderByOrderIndexAsc(module.getId());
+        quiz.setOrderIndex(existingQuizzes.size() + 1);
+
         Quiz saved = quizRepository.save(quiz);
         return convertToQuizDTO(saved);
+    }
+
+    public List<QuizDTO> getQuizzesForModule(Long moduleId) {
+        List<Quiz> quizzes = quizRepository.findByModuleIdOrderByOrderIndexAsc(moduleId);
+        return quizzes.stream().map(this::convertToQuizDTO).collect(Collectors.toList());
     }
 
     @Transactional
@@ -177,6 +186,7 @@ public class QuizService {
         dto.setQuestionText(question.getQuestionText());
         dto.setQuestionType(question.getQuestionType());
         dto.setPoints(question.getPoints());
+        dto.setDifficultyLevel(question.getDifficultyLevel());
 
         if ("MULTIPLE_CHOICE".equals(question.getQuestionType())) {
             List<QuestionOption> options = questionOptionRepository

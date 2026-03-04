@@ -203,16 +203,17 @@ public class CourseService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new RuntimeException("Course not found with id: " + courseId));
 
-        // 1. Collect all lesson IDs and quiz IDs for this course
+        // 1. Collect all module IDs, lesson IDs, and quiz IDs for this course
         List<Module> modules = moduleRepository.findByCourseIdOrderByOrderIndexAsc(courseId);
+        List<Long> moduleIds = modules.stream().map(Module::getId).collect(Collectors.toList());
         List<Long> lessonIds = modules.stream()
                 .flatMap(m -> lessonRepository.findByModuleIdOrderByOrderIndexAsc(m.getId()).stream())
                 .map(Lesson::getId)
                 .collect(Collectors.toList());
 
-        if (!lessonIds.isEmpty()) {
+        if (!moduleIds.isEmpty()) {
             // 2. Delete quiz attempts and their responses
-            List<Long> quizIds = quizRepository.findByLessonIdIn(lessonIds).stream()
+            List<Long> quizIds = quizRepository.findByModuleIdIn(moduleIds).stream()
                     .map(quiz -> quiz.getId())
                     .collect(Collectors.toList());
 
@@ -226,7 +227,9 @@ public class CourseService {
                 }
                 quizAttemptRepository.deleteByQuizIdIn(quizIds);
             }
+        }
 
+        if (!lessonIds.isEmpty()) {
             // 3. Delete lesson progress
             lessonProgressRepository.deleteByLessonIdIn(lessonIds);
         }

@@ -10,12 +10,12 @@ import java.util.Optional;
 @Repository
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
 
-    // Find all quizzes for a lesson
-    List<Quiz> findByLessonId(Long lessonId);
+    // Find all quizzes for a module (ordered by quiz order)
+    List<Quiz> findByModuleIdOrderByOrderIndexAsc(Long moduleId);
 
-    // Find quiz by lesson (assuming one quiz per lesson for now)
-    Optional<Quiz> findFirstByLessonId(Long lessonId);
+    // Find first quiz for a module
+    Optional<Quiz> findFirstByModuleId(Long moduleId);
 
-    // Find all quizzes for lessons in a list
-    List<Quiz> findByLessonIdIn(List<Long> lessonIds);
+    // Find all quizzes for modules in a list
+    List<Quiz> findByModuleIdIn(List<Long> moduleIds);
 }

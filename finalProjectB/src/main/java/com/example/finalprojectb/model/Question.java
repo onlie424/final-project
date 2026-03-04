@@ -38,6 +38,9 @@ public class Question {
     @Column(name = "points")
     private Integer points = 1; // Points for this question
 
+    @Column(name = "difficulty_level", length = 20)
+    private String difficultyLevel = "EASY"; // "EASY", "MEDIUM", "HARD"
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

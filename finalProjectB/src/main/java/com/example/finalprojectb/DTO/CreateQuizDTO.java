@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class CreateQuizDTO {
-    private Long lessonId;
+    private Long moduleId;
     private String title;
     private String description;
     private Integer passingScore;

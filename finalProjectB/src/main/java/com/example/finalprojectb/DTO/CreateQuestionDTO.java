@@ -13,5 +13,6 @@ public class CreateQuestionDTO {
     private String explanation;
     private Integer points;
     private Integer orderIndex;
+    private String difficultyLevel; // "EASY", "MEDIUM", "HARD"
     private List<CreateQuestionOptionDTO> options; // For MULTIPLE_CHOICE
 }

@@ -10,5 +10,6 @@ public class QuestionDTO {
     private String questionText;
     private String questionType;
     private Integer points;
+    private String difficultyLevel;
     private List<QuestionOptionDTO> options;
 }

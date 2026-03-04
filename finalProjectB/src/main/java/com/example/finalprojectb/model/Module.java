@@ -40,6 +40,11 @@ public class Module {
     @OrderBy("orderIndex ASC")
     private List<Lesson> lessons = new ArrayList<>();
 
+    // Relationship with quizzes (each module has 2 quizzes)
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderIndex ASC")
+    private List<Quiz> quizzes = new ArrayList<>();
+
     // Lifecycle callbacks
     @PrePersist
     protected void onCreate() {

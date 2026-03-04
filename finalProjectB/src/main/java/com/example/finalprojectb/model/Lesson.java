@@ -3,8 +3,6 @@ package com.example.finalprojectb.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * PHASE 1: Lesson Entity
@@ -43,10 +41,6 @@ public class Lesson {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    // Relationship with quizzes (one lesson can have multiple quizzes)
-    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Quiz> quizzes = new ArrayList<>();
 
     // Lifecycle callbacks
     @PrePersist

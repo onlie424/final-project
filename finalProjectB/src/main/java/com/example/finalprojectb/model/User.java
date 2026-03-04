@@ -28,8 +28,8 @@ public class User {
     @Column(nullable = false)
     private Role role = Role.USER;
 
-//    @Column(name = "is_active")
-//    private Boolean isActive = true;
+    @Column(name = "login_streak", nullable = false)
+    private int loginStreak = 0;
 
     public enum Role {
         USER, ADMIN

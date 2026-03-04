@@ -57,7 +57,8 @@ public class LessonService {
         dto.setContentText(lesson.getContentText());
         dto.setDurationMinutes(lesson.getDurationMinutes());
 
-        List<Quiz> quizzes = quizRepository.findByLessonId(lessonId);
+        // Quizzes belong to the module, not the lesson
+        List<Quiz> quizzes = quizRepository.findByModuleIdOrderByOrderIndexAsc(lesson.getModule().getId());
         List<QuizDTO> quizDTOs = quizzes.stream()
                 .map(this::convertToQuizDTO)
                 .collect(Collectors.toList());

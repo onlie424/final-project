@@ -7,8 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * PHASE 1: Quiz Entity
- * Assessment for lessons
+ * Quiz Entity
+ * Assessment for modules (covers lessons within a module)
+ * Each module has 2 quizzes: Quiz 1 covers first half of lessons, Quiz 2 covers second half
  */
 @Data
 @Entity
@@ -20,8 +21,11 @@ public class Quiz {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lesson_id", nullable = false)
-    private Lesson lesson;
+    @JoinColumn(name = "module_id", nullable = false)
+    private Module module;
+
+    @Column(name = "order_index")
+    private Integer orderIndex = 1; // Quiz 1 = first half of lessons, Quiz 2 = second half
 
     @Column(nullable = false, length = 255)
     private String title;
