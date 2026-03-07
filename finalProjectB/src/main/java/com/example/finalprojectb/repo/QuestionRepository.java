@@ -15,4 +15,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
 
     // Count questions in a quiz
     Long countByQuizId(Long quizId);
+
+    // Find questions by quiz and difficulty level (for adaptive quiz rounds)
+    List<Question> findByQuizIdAndDifficultyLevel(Long quizId, String difficultyLevel);
 }

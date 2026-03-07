@@ -1,6 +1,7 @@
 package com.example.finalprojectb.service;
 import com.example.finalprojectb.DTO.*;
 import com.example.finalprojectb.model.*;
+import com.example.finalprojectb.model.Module;
 import com.example.finalprojectb.repo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

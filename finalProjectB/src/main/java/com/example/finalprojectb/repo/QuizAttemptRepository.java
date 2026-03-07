@@ -2,6 +2,8 @@ package com.example.finalprojectb.repo;
 
 import com.example.finalprojectb.model.QuizAttempt;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -27,4 +29,12 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
 
     // Delete all attempts for quizzes in a list
     void deleteByQuizIdIn(List<Long> quizIds);
+
+    // Check if user has passed a specific quiz
+    @Query("SELECT CASE WHEN COUNT(qa) > 0 THEN true ELSE false END FROM QuizAttempt qa WHERE qa.user.id = :userId AND qa.quiz.id = :quizId AND qa.isPassed = true")
+    boolean hasUserPassedQuiz(@Param("userId") Long userId, @Param("quizId") Long quizId);
+
+    // Check if user has passed ALL quizzes for a module
+    @Query("SELECT CASE WHEN COUNT(DISTINCT q) = (SELECT COUNT(q2) FROM Quiz q2 WHERE q2.module.id = :moduleId) THEN true ELSE false END FROM Quiz q JOIN QuizAttempt qa ON qa.quiz = q WHERE q.module.id = :moduleId AND qa.user.id = :userId AND qa.isPassed = true")
+    boolean hasUserPassedAllModuleQuizzes(@Param("userId") Long userId, @Param("moduleId") Long moduleId);
 }
