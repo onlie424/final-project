@@ -55,6 +55,45 @@ public class QuizService {
         return convertToQuizDTO(saved);
     }
 
+    @Transactional
+    public QuestionDTO addQuestion(Long quizId, CreateQuestionDTO dto) {
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new RuntimeException("Quiz not found with id: " + quizId));
+
+        Question question = new Question();
+        question.setQuiz(quiz);
+        question.setQuestionText(dto.getQuestionText());
+        question.setQuestionType(dto.getQuestionType());
+        question.setCorrectAnswer(dto.getCorrectAnswer());
+        question.setExplanation(dto.getExplanation());
+        question.setPoints(dto.getPoints() != null ? dto.getPoints() : 1);
+        question.setDifficultyLevel(dto.getDifficultyLevel() != null ? dto.getDifficultyLevel() : "EASY");
+
+        // Auto-set order index if not provided
+        if (dto.getOrderIndex() != null) {
+            question.setOrderIndex(dto.getOrderIndex());
+        } else {
+            Long count = questionRepository.countByQuizId(quizId);
+            question.setOrderIndex((int) (count + 1));
+        }
+
+        Question savedQuestion = questionRepository.save(question);
+
+        // Save options for multiple choice questions
+        if ("MULTIPLE_CHOICE".equals(dto.getQuestionType()) && dto.getOptions() != null) {
+            for (CreateQuestionOptionDTO optionDTO : dto.getOptions()) {
+                QuestionOption option = new QuestionOption();
+                option.setQuestion(savedQuestion);
+                option.setOptionText(optionDTO.getOptionText());
+                option.setIsCorrect(optionDTO.getIsCorrect());
+                option.setOrderIndex(optionDTO.getOrderIndex());
+                questionOptionRepository.save(option);
+            }
+        }
+
+        return convertToQuestionDTO(savedQuestion);
+    }
+
     public List<QuizDTO> getQuizzesForModule(Long moduleId) {
         List<Quiz> quizzes = quizRepository.findByModuleIdOrderByOrderIndexAsc(moduleId);
         return quizzes.stream().map(this::convertToQuizDTO).collect(Collectors.toList());
