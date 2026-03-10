@@ -401,7 +401,7 @@ public class DashboardService {
 
             // Find quizzes not yet taken
             List<Quiz> courseQuizzes = quizRepository.findAll().stream()
-                    .filter(q -> q.getLesson().getModule().getCourse().getId().equals(course.getId()))
+                    .filter(q -> q.getModule().getCourse().getId().equals(course.getId()))
                     .collect(Collectors.toList());
 
             for (Quiz quiz : courseQuizzes) {
