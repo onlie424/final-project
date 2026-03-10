@@ -7,6 +7,7 @@ import Login from './components/pages/auth/login';
 import Register from './components/pages/auth/registration';
 import AdminDashboard from './components/pages/admin/Dashboard';
 import CourseCreate from './components/pages/admin/CourseCreate';
+import QuizManage from './components/pages/admin/QuizManage';
 import UserDashboard from './components/pages/student/Dashboard';
 import CourseDetail from './components/pages/student/CourseDetail';
 import Classroom from './components/pages/student/Classroom';
@@ -176,6 +177,16 @@ function App() {
           element={
             <AdminRoute>
               <CourseCreate />
+            </AdminRoute>
+          }
+        />
+
+        {/* Admin Quiz Management Route */}
+        <Route
+          path="/admin/courses/:courseId/quizzes"
+          element={
+            <AdminRoute>
+              <QuizManage />
             </AdminRoute>
           }
         />

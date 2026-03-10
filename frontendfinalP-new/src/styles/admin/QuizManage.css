@@ -1,0 +1,239 @@
+/* ========================================
+   Quiz Manage Page Styles
+   (Extends CourseCreate.css patterns)
+======================================== */
+
+.quiz-manage-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 50%, #fef3c7 100%);
+  padding: 2rem;
+}
+
+.quiz-manage-header {
+  max-width: 900px;
+  margin: 0 auto 2rem;
+}
+
+.quiz-manage-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.course-title-subtitle {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin: 0.25rem 0 0 0;
+}
+
+/* Success Message */
+.success-message {
+  max-width: 900px;
+  margin: 0 auto 1.5rem;
+  background: #d1fae5;
+  color: #065f46;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+/* Module Selector Tabs */
+.module-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.module-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0.875rem 1.25rem;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 160px;
+}
+
+.module-tab:hover {
+  border-color: #c7d2fe;
+  background: #eef2ff;
+}
+
+.module-tab.active {
+  border-color: #6366f1;
+  background: #eef2ff;
+}
+
+.module-tab-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #1f2937;
+}
+
+.module-tab-lessons {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.25rem;
+}
+
+/* Quizzes List */
+.quizzes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.quiz-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quiz-card:hover {
+  border-color: #c7d2fe;
+  background: #eef2ff;
+}
+
+.quiz-card.selected {
+  border-color: #6366f1;
+  background: #eef2ff;
+}
+
+.quiz-card-info h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.quiz-card-info p {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0.25rem 0 0 0;
+}
+
+.quiz-card-stats {
+  display: flex;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.quiz-card-stats .stat {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #6b7280;
+  background: white;
+  padding: 0.25rem 0.625rem;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+/* Add Question Form */
+.add-question-form {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Options Section */
+.options-section {
+  margin-bottom: 1.25rem;
+}
+
+.options-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.options-header label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.option-row input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #6366f1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.option-input {
+  flex: 1;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.9rem;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #f9fafb;
+  transition: all 0.2s;
+}
+
+.option-input:focus {
+  outline: none;
+  border-color: #6366f1;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.option-hint {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-style: italic;
+  margin: 0.5rem 0 0 0;
+}
+
+/* Difficulty badges in question form */
+select option[value="EASY"] { color: #059669; }
+select option[value="MEDIUM"] { color: #d97706; }
+select option[value="HARD"] { color: #dc2626; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .quiz-manage-page {
+    padding: 1rem;
+  }
+
+  .module-selector {
+    flex-direction: column;
+  }
+
+  .quiz-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .quiz-card-stats {
+    flex-wrap: wrap;
+  }
+
+  .option-row {
+    flex-wrap: nowrap;
+  }
+}

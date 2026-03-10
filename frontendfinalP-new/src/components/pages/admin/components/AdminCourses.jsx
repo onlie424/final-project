@@ -78,6 +78,12 @@ function AdminCourses({ courses, onPublish, onUnpublish, onDelete }) {
                       >
                         Edit
                       </button>
+                      <button
+                        className="btn-action quizzes"
+                        onClick={() => navigate(`/admin/courses/${course.id}/quizzes`)}
+                      >
+                        Quizzes
+                      </button>
                       {course.isPublished ? (
                         <button
                           className="btn-action unpublish"

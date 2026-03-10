@@ -217,7 +217,7 @@ export default function Dashboard() {
             </div>
             <div className="progress-card">
               <div className="progress-card-icon">⭐</div>
-              <div className="progress-card-value">Level 2</div>
+              <div className="progress-card-value">Level 1</div>
               <div className="progress-card-label">Your Level</div>
             </div>
           </div>

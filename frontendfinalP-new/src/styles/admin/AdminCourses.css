@@ -45,3 +45,13 @@
   color: #6b7280;
   margin-top: 2px;
 }
+
+/* Quizzes action button */
+.btn-action.quizzes {
+  background: #e0e7ff;
+  color: #4f46e5;
+}
+
+.btn-action.quizzes:hover {
+  background: #c7d2fe;
+}
