@@ -12,4 +12,7 @@ public class QuestionDTO {
     private Integer points;
     private String difficultyLevel;
     private List<QuestionOptionDTO> options;
+    // Admin-only fields (null for student responses)
+    private String correctAnswer;
+    private String explanation;
 }

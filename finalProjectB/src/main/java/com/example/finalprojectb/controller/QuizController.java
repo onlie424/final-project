@@ -54,6 +54,22 @@ public class QuizController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+    // Get all questions for a quiz (admin - includes correct answers)
+    @GetMapping("/{quizId}/questions/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<QuestionDTO>> getQuestionsForAdmin(@PathVariable Long quizId) {
+        List<QuestionDTO> questions = quizService.getQuestionsForAdmin(quizId);
+        return ResponseEntity.ok(questions);
+    }
+
+    // Delete a question
+    @DeleteMapping("/questions/{questionId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteQuestion(@PathVariable Long questionId) {
+        quizService.deleteQuestion(questionId);
+        return ResponseEntity.noContent().build();
+    }
+
     // ==================== QUIZ RETRIEVAL ====================
 
     // Get all quizzes for a module

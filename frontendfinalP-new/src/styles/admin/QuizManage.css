@@ -213,6 +213,185 @@ select option[value="EASY"] { color: #059669; }
 select option[value="MEDIUM"] { color: #d97706; }
 select option[value="HARD"] { color: #dc2626; }
 
+/* ==================== Question Review ==================== */
+
+.existing-questions {
+  margin-top: 1rem;
+}
+
+.questions-summary {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0 0 1rem 0;
+  font-weight: 500;
+}
+
+.review-question-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.rq-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.rq-number {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #6366f1;
+  background: #eef2ff;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+}
+
+.rq-difficulty {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  color: white;
+}
+
+.rq-difficulty.easy { background: #22c55e; }
+.rq-difficulty.medium { background: #f59e0b; }
+.rq-difficulty.hard { background: #ef4444; }
+
+.rq-type {
+  font-size: 0.75rem;
+  color: #6b7280;
+  background: #e5e7eb;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  text-transform: capitalize;
+}
+
+.rq-points {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-left: auto;
+}
+
+.rq-delete-btn {
+  font-size: 0.75rem;
+  color: #ef4444;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rq-delete-btn:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.review-question-card .rq-text {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1f2937;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.5;
+}
+
+/* Review Options */
+.rq-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.rq-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.rq-option.correct {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.rq-option-letter {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #e5e7eb;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.rq-option.correct .rq-option-letter {
+  background: #22c55e;
+  color: white;
+}
+
+.rq-option-text {
+  flex: 1;
+}
+
+.rq-correct-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #16a34a;
+  background: #dcfce7;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+}
+
+/* Correct Answer for TRUE_FALSE / SHORT_ANSWER */
+.rq-correct-answer {
+  font-size: 0.85rem;
+  color: #16a34a;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.rq-correct-answer strong {
+  color: #15803d;
+}
+
+/* Explanation */
+.rq-explanation {
+  font-size: 0.8rem;
+  color: #6b7280;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-style: italic;
+}
+
+.rq-explanation strong {
+  font-style: normal;
+  color: #475569;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .quiz-manage-page {

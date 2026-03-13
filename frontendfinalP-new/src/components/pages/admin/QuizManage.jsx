@@ -21,6 +21,8 @@ function QuizManage() {
   // Quizzes for the selected module
   const [quizzes, setQuizzes] = useState([]);
   const [selectedQuizId, setSelectedQuizId] = useState(null);
+  const [quizQuestions, setQuizQuestions] = useState([]);
+  const [loadingQuestions, setLoadingQuestions] = useState(false);
 
   // Create quiz form
   const [showCreateQuiz, setShowCreateQuiz] = useState(false);
@@ -84,8 +86,35 @@ function QuizManage() {
       const data = await quizService.getQuizzesForModule(selectedModuleId);
       setQuizzes(data);
       setSelectedQuizId(null);
+      setQuizQuestions([]);
     } catch (err) {
       console.error('Error loading quizzes:', err);
+    }
+  };
+
+  const loadQuizQuestions = async (quizId) => {
+    try {
+      setLoadingQuestions(true);
+      const data = await quizService.getQuestionsForAdmin(quizId);
+      setQuizQuestions(data);
+    } catch (err) {
+      console.error('Error loading questions:', err);
+      setQuizQuestions([]);
+    } finally {
+      setLoadingQuestions(false);
+    }
+  };
+
+  const handleDeleteQuestion = async (questionId) => {
+    if (!window.confirm('Are you sure you want to delete this question?')) return;
+    try {
+      await quizService.deleteQuestion(questionId);
+      setSuccess('Question deleted.');
+      await loadQuizQuestions(selectedQuizId);
+      await loadQuizzes();
+    } catch (err) {
+      console.error('Error deleting question:', err);
+      setError('Failed to delete question.');
     }
   };
 
@@ -164,6 +193,7 @@ function QuizManage() {
       setSuccess('Question added successfully!');
       resetQuestionForm();
       await loadQuizzes(); // Refresh question count
+      await loadQuizQuestions(selectedQuizId); // Refresh questions list
     } catch (err) {
       console.error('Error adding question:', err);
       setError('Failed to add question.');
@@ -313,6 +343,7 @@ function QuizManage() {
                       setSelectedQuizId(quiz.id);
                       setShowCreateQuiz(false);
                       setShowAddQuestion(false);
+                      loadQuizQuestions(quiz.id);
                     }}
                   >
                     <div className="quiz-card-info">
@@ -401,10 +432,73 @@ function QuizManage() {
                 </button>
               </div>
 
+              {/* Existing Questions Review */}
               {!showAddQuestion && (
-                <div className="empty-modules">
-                  <p>Click "Add Question" to add questions to this quiz. Add questions with different difficulty levels (EASY, MEDIUM, HARD) for the adaptive quiz system.</p>
-                </div>
+                <>
+                  {loadingQuestions ? (
+                    <p style={{ color: '#64748b', padding: '1rem 0' }}>Loading questions...</p>
+                  ) : quizQuestions.length === 0 ? (
+                    <div className="empty-modules">
+                      <p>No questions yet. Click "+ Add Question" to start adding questions with different difficulty levels (EASY, MEDIUM, HARD).</p>
+                    </div>
+                  ) : (
+                    <div className="existing-questions">
+                      <p className="questions-summary">
+                        {quizQuestions.length} question{quizQuestions.length !== 1 ? 's' : ''} &mdash;
+                        {' '}{quizQuestions.filter(q => q.difficultyLevel === 'EASY').length} Easy,
+                        {' '}{quizQuestions.filter(q => q.difficultyLevel === 'MEDIUM').length} Medium,
+                        {' '}{quizQuestions.filter(q => q.difficultyLevel === 'HARD').length} Hard
+                      </p>
+                      {quizQuestions.map((q, idx) => (
+                        <div key={q.id} className="review-question-card">
+                          <div className="rq-header">
+                            <span className="rq-number">Q{idx + 1}</span>
+                            <span className={`rq-difficulty ${q.difficultyLevel?.toLowerCase()}`}>
+                              {q.difficultyLevel}
+                            </span>
+                            <span className="rq-type">{q.questionType?.replace('_', ' ')}</span>
+                            <span className="rq-points">{q.points} pt{q.points !== 1 ? 's' : ''}</span>
+                            <button
+                              className="rq-delete-btn"
+                              onClick={() => handleDeleteQuestion(q.id)}
+                              title="Delete question"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                          <p className="rq-text">{q.questionText}</p>
+
+                          {q.questionType === 'MULTIPLE_CHOICE' && q.options && (
+                            <div className="rq-options">
+                              {q.options.map((opt, oi) => (
+                                <div
+                                  key={opt.id}
+                                  className={`rq-option ${opt.isCorrect ? 'correct' : ''}`}
+                                >
+                                  <span className="rq-option-letter">{String.fromCharCode(65 + oi)}</span>
+                                  <span className="rq-option-text">{opt.optionText}</span>
+                                  {opt.isCorrect && <span className="rq-correct-badge">Correct</span>}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {(q.questionType === 'TRUE_FALSE' || q.questionType === 'SHORT_ANSWER') && q.correctAnswer && (
+                            <div className="rq-correct-answer">
+                              <strong>Correct Answer:</strong> {q.correctAnswer}
+                            </div>
+                          )}
+
+                          {q.explanation && (
+                            <div className="rq-explanation">
+                              <strong>Explanation:</strong> {q.explanation}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
 
               {showAddQuestion && (

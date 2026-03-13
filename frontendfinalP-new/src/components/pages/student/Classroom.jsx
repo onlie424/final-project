@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { courseService } from '../../../services/courseService';
 import { enrollmentService } from '../../../services/enrollmentService';
+import { quizService } from '../../../services/quizService';
 import '../../../styles/Classroom.css';
 
 // Convert YouTube URLs to embeddable format
@@ -32,6 +33,7 @@ export default function Classroom() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [markingComplete, setMarkingComplete] = useState(false);
+  const [moduleQuizzes, setModuleQuizzes] = useState({});
 
   // Calculate progress
   const totalLessons = course?.modules?.reduce(
@@ -75,6 +77,22 @@ export default function Classroom() {
       // Load completed lessons from progress (if available)
       if (courseData.completedLessonIds) {
         setCompletedLessons(new Set(courseData.completedLessonIds));
+      }
+
+      // Fetch quizzes for each module
+      if (courseData.modules?.length > 0) {
+        const quizMap = {};
+        for (const mod of courseData.modules) {
+          try {
+            const quizzes = await quizService.getQuizzesForModule(mod.id);
+            if (quizzes?.length > 0) {
+              quizMap[mod.id] = quizzes;
+            }
+          } catch (e) {
+            // Module may have no quizzes, that's fine
+          }
+        }
+        setModuleQuizzes(quizMap);
       }
     } catch (err) {
       console.error('Error fetching course:', err);
@@ -512,6 +530,30 @@ export default function Classroom() {
                         </button>
                       );
                     })}
+
+                    {/* Module Quiz Button */}
+                    {moduleQuizzes[module.id]?.map((quiz) => (
+                      <button
+                        key={`quiz-${quiz.id}`}
+                        className="lesson-item quiz-item"
+                        onClick={() => navigate(`/classroom/${courseId}/module/${module.id}/quiz/${quiz.id}`)}
+                      >
+                        <div className="lesson-status">
+                          <svg className="quiz-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z" />
+                          </svg>
+                        </div>
+                        <div className="lesson-info">
+                          <span className="lesson-title">{quiz.title || 'Module Quiz'}</span>
+                          <span className="lesson-meta quiz-meta">
+                            <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" style={{width: 14, height: 14}}>
+                              <path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z" />
+                            </svg>
+                            Adaptive Quiz
+                          </span>
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 )}
               </div>

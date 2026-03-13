@@ -99,6 +99,21 @@ public class QuizService {
         return quizzes.stream().map(this::convertToQuizDTO).collect(Collectors.toList());
     }
 
+    public List<QuestionDTO> getQuestionsForAdmin(Long quizId) {
+        List<Question> questions = questionRepository.findByQuizIdOrderByOrderIndexAsc(quizId);
+        return questions.stream().map(this::convertToAdminQuestionDTO).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void deleteQuestion(Long questionId) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new RuntimeException("Question not found with id: " + questionId));
+        if ("MULTIPLE_CHOICE".equals(question.getQuestionType())) {
+            questionOptionRepository.deleteByQuestionId(questionId);
+        }
+        questionRepository.delete(question);
+    }
+
     @Transactional
     public QuizAttemptDTO startQuiz(StartQuizDTO dto) {
         Quiz quiz = quizRepository.findById(dto.getQuizId())
@@ -245,6 +260,38 @@ public class QuizService {
         dto.setId(option.getId());
         dto.setOptionText(option.getOptionText());
         dto.setOrderIndex(option.getOrderIndex());
+        // isCorrect left null for student responses
+        return dto;
+    }
+
+    private QuestionDTO convertToAdminQuestionDTO(Question question) {
+        QuestionDTO dto = new QuestionDTO();
+        dto.setId(question.getId());
+        dto.setQuestionText(question.getQuestionText());
+        dto.setQuestionType(question.getQuestionType());
+        dto.setPoints(question.getPoints());
+        dto.setDifficultyLevel(question.getDifficultyLevel());
+        dto.setCorrectAnswer(question.getCorrectAnswer());
+        dto.setExplanation(question.getExplanation());
+
+        if ("MULTIPLE_CHOICE".equals(question.getQuestionType())) {
+            List<QuestionOption> options = questionOptionRepository
+                    .findByQuestionIdOrderByOrderIndexAsc(question.getId());
+            List<QuestionOptionDTO> optionDTOs = options.stream()
+                    .map(this::convertToAdminOptionDTO)
+                    .collect(Collectors.toList());
+            dto.setOptions(optionDTOs);
+        }
+
+        return dto;
+    }
+
+    private QuestionOptionDTO convertToAdminOptionDTO(QuestionOption option) {
+        QuestionOptionDTO dto = new QuestionOptionDTO();
+        dto.setId(option.getId());
+        dto.setOptionText(option.getOptionText());
+        dto.setOrderIndex(option.getOrderIndex());
+        dto.setIsCorrect(option.getIsCorrect());
         return dto;
     }
 }

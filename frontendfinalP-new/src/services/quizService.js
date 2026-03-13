@@ -15,6 +15,17 @@ export const quizService = {
     return response.data;
   },
 
+  // Get all questions for a quiz (admin - includes correct answers)
+  getQuestionsForAdmin: async (quizId) => {
+    const response = await axios.get(`/api/quizzes/${quizId}/questions/admin`);
+    return response.data;
+  },
+
+  // Delete a question
+  deleteQuestion: async (questionId) => {
+    await axios.delete(`/api/quizzes/questions/${questionId}`);
+  },
+
   // ==================== QUIZ RETRIEVAL ====================
 
   // Get all quizzes for a module

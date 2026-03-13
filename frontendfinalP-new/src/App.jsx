@@ -11,6 +11,7 @@ import QuizManage from './components/pages/admin/QuizManage';
 import UserDashboard from './components/pages/student/Dashboard';
 import CourseDetail from './components/pages/student/CourseDetail';
 import Classroom from './components/pages/student/Classroom';
+import AdaptiveQuiz from './components/pages/student/AdaptiveQuiz';
 import WelcomePage from './components/WelcomePage';
 
 // Protected Route Component
@@ -225,6 +226,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Classroom />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/classroom/:courseId/module/:moduleId/quiz/:quizId"
+          element={
+            <ProtectedRoute>
+              <AdaptiveQuiz />
             </ProtectedRoute>
           }
         />
