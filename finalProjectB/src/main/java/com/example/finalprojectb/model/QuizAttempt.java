@@ -52,6 +52,9 @@ public class QuizAttempt {
     @Column(name = "is_passed")
     private Boolean isPassed = false;
 
+    @Column(name = "highest_passed_difficulty")
+    private String highestPassedDifficulty;
+
     @PrePersist
     protected void onCreate() {
         attemptedAt = LocalDateTime.now();

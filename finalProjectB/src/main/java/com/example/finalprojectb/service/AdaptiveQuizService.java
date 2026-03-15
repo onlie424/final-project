@@ -50,6 +50,19 @@ public class AdaptiveQuizService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
+        // Check if the user has a previous failed attempt with passed rounds (for resume)
+        String startDifficulty = "EASY";
+        boolean resumed = false;
+        java.util.Optional<QuizAttempt> lastResumable = quizAttemptRepository.findLastResumableAttempt(userId, quizId);
+        if (lastResumable.isPresent()) {
+            String highestPassed = lastResumable.get().getHighestPassedDifficulty();
+            String nextAfterPassed = getNextDifficulty(highestPassed);
+            if (nextAfterPassed != null) {
+                startDifficulty = nextAfterPassed;
+                resumed = true;
+            }
+        }
+
         // Create a new attempt
         Long attemptCount = quizAttemptRepository.countByUserIdAndQuizId(userId, quizId);
         QuizAttempt attempt = new QuizAttempt();
@@ -62,10 +75,10 @@ public class AdaptiveQuizService {
         // Get ML prediction
         MLPredictionResponseDTO prediction = proficiencyService.getPrediction(userId, quizId);
 
-        // Fetch EASY questions and shuffle them
-        List<Question> easyQuestions = questionRepository.findByQuizIdAndDifficultyLevel(quizId, "EASY");
-        Collections.shuffle(easyQuestions);
-        List<Question> roundQuestions = easyQuestions.stream()
+        // Fetch questions for the starting difficulty and shuffle them
+        List<Question> startQuestions = questionRepository.findByQuizIdAndDifficultyLevel(quizId, startDifficulty);
+        Collections.shuffle(startQuestions);
+        List<Question> roundQuestions = startQuestions.stream()
                 .limit(MAX_QUESTIONS_PER_ROUND)
                 .collect(Collectors.toList());
 
@@ -78,10 +91,11 @@ public class AdaptiveQuizService {
         response.setAttemptId(savedAttempt.getId());
         response.setQuizId(quiz.getId());
         response.setQuizTitle(quiz.getTitle());
-        response.setCurrentDifficulty("EASY");
+        response.setCurrentDifficulty(startDifficulty);
         response.setQuestions(questionDTOs);
         response.setMlPrediction(prediction.getSuccessProbability());
         response.setMlRecommendation(prediction.getRecommendation());
+        response.setResumedFromPreviousAttempt(resumed);
 
         return response;
     }
@@ -134,7 +148,11 @@ public class AdaptiveQuizService {
         result.setQuestionResults(questionResults);
 
         if (roundScore >= 70) {
-            // Passed this round - escalate or complete
+            // Passed this round - track highest passed difficulty
+            attempt.setHighestPassedDifficulty(dto.getDifficulty());
+            quizAttemptRepository.save(attempt);
+
+            // Escalate or complete
             String nextDifficulty = getNextDifficulty(dto.getDifficulty());
 
             if (nextDifficulty == null) {

@@ -34,9 +34,16 @@ export default function AdaptiveQuiz() {
   // Result data
   const [roundResult, setRoundResult] = useState(null);
   const [allRounds, setAllRounds] = useState([]);
+  const [resumedFromPrevious, setResumedFromPrevious] = useState(false);
 
   // Timer
   const [startTime, setStartTime] = useState(null);
+
+  const getDifficultiesBefore = (difficulty) => {
+    const order = ['EASY', 'MEDIUM', 'HARD'];
+    const index = order.indexOf(difficulty);
+    return order.slice(0, index);
+  };
 
   const handleStartQuiz = async () => {
     try {
@@ -51,6 +58,17 @@ export default function AdaptiveQuiz() {
       setMlRecommendation(data.mlRecommendation);
       setAnswers({});
       setStartTime(Date.now());
+
+      // If resumed from a previous attempt, pre-populate passed rounds
+      if (data.resumedFromPreviousAttempt && data.currentDifficulty !== 'EASY') {
+        setResumedFromPrevious(true);
+        const passedDifficulties = getDifficultiesBefore(data.currentDifficulty);
+        setAllRounds(passedDifficulties.map((d) => ({ difficulty: d, score: null, previouslyPassed: true })));
+      } else {
+        setResumedFromPrevious(false);
+        setAllRounds([]);
+      }
+
       setPhase(PHASES.IN_ROUND);
     } catch (err) {
       console.error('Error starting quiz:', err);
@@ -76,11 +94,15 @@ export default function AdaptiveQuiz() {
 
     const timeTaken = startTime ? Math.round((Date.now() - startTime) / 1000) : 0;
 
-    const answerList = Object.entries(answers).map(([questionId, answer]) => ({
-      questionId: parseInt(questionId),
-      selectedOptionId: typeof answer === 'number' ? answer : null,
-      userAnswer: typeof answer === 'string' ? answer : null,
-    }));
+    // Include ALL questions — unanswered ones are sent as null so they count as incorrect
+    const answerList = questions.map((q) => {
+      const answer = answers[q.id];
+      return {
+        questionId: q.id,
+        selectedOptionId: answer !== undefined && typeof answer === 'number' ? answer : null,
+        userAnswer: answer !== undefined && typeof answer === 'string' ? answer : null,
+      };
+    });
 
     try {
       setLoading(true);
@@ -213,21 +235,35 @@ export default function AdaptiveQuiz() {
         <div className="round-difficulty" style={{ background: getDifficultyColor(currentDifficulty) }}>
           {currentDifficulty}
         </div>
-        <h2>Round {allRounds.length + 1} of 3</h2>
+        <h2>Round {allRounds.length + 1} of 3{resumedFromPrevious && allRounds.some((r) => r.previouslyPassed) ? ' (Resumed)' : ''}</h2>
         <span className="question-count">{questions.length} questions</span>
       </div>
 
+      {resumedFromPrevious && allRounds.some((r) => r.previouslyPassed) && (
+        <div className="resume-banner">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+            <path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z" />
+          </svg>
+          <span>Resuming from <strong>{currentDifficulty}</strong> round — you passed the earlier rounds in a previous attempt.</span>
+        </div>
+      )}
+
       <div className="round-progress">
         <div className="round-dots">
-          {['EASY', 'MEDIUM', 'HARD'].map((d) => (
-            <div
-              key={d}
-              className={`round-dot ${d === currentDifficulty ? 'active' : ''} ${allRounds.some((r) => r.difficulty === d) ? 'done' : ''}`}
-              style={{ '--dot-color': getDifficultyColor(d) }}
-            >
-              <span className="dot-label">{d}</span>
-            </div>
-          ))}
+          {['EASY', 'MEDIUM', 'HARD'].map((d) => {
+            const prevPassed = allRounds.some((r) => r.difficulty === d && r.previouslyPassed);
+            const doneThisAttempt = allRounds.some((r) => r.difficulty === d && !r.previouslyPassed);
+            return (
+              <div
+                key={d}
+                className={`round-dot ${d === currentDifficulty ? 'active' : ''} ${doneThisAttempt ? 'done' : ''} ${prevPassed ? 'done prev-passed' : ''}`}
+                style={{ '--dot-color': getDifficultyColor(d) }}
+              >
+                <span className="dot-label">{d}</span>
+                {prevPassed && <span className="dot-prev-label">Passed</span>}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -407,12 +443,21 @@ export default function AdaptiveQuiz() {
           <h3>Round Summary</h3>
           <div className="rounds-grid">
             {allRounds.map((round, i) => (
-              <div key={i} className="round-summary-card">
+              <div key={i} className={`round-summary-card ${round.previouslyPassed ? 'prev-passed' : ''}`}>
                 <div className="rs-difficulty" style={{ background: getDifficultyColor(round.difficulty) }}>
                   {round.difficulty}
                 </div>
-                <div className="rs-score">{round.score}%</div>
-                <div className="rs-detail">{round.correct}/{round.total} correct</div>
+                {round.previouslyPassed ? (
+                  <>
+                    <div className="rs-score prev">Passed</div>
+                    <div className="rs-detail">Previous attempt</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="rs-score">{round.score}%</div>
+                    <div className="rs-detail">{round.correct}/{round.total} correct</div>
+                  </>
+                )}
               </div>
             ))}
           </div>
@@ -489,6 +534,7 @@ export default function AdaptiveQuiz() {
               setAllRounds([]);
               setRoundResult(null);
               setAnswers({});
+              setResumedFromPrevious(false);
             }}>
               Retry Quiz
             </button>

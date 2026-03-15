@@ -34,6 +34,10 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, Long> 
     @Query("SELECT CASE WHEN COUNT(qa) > 0 THEN true ELSE false END FROM QuizAttempt qa WHERE qa.user.id = :userId AND qa.quiz.id = :quizId AND qa.isPassed = true")
     boolean hasUserPassedQuiz(@Param("userId") Long userId, @Param("quizId") Long quizId);
 
+    // Find the most recent completed, failed attempt with a passed difficulty (for resume logic)
+    @Query("SELECT qa FROM QuizAttempt qa WHERE qa.user.id = :userId AND qa.quiz.id = :quizId AND qa.status = 'COMPLETED' AND qa.isPassed = false AND qa.highestPassedDifficulty IS NOT NULL ORDER BY qa.attemptedAt DESC")
+    Optional<QuizAttempt> findLastResumableAttempt(@Param("userId") Long userId, @Param("quizId") Long quizId);
+
     // Check if user has passed ALL quizzes for a module
     @Query("SELECT CASE WHEN COUNT(DISTINCT q) = (SELECT COUNT(q2) FROM Quiz q2 WHERE q2.module.id = :moduleId) THEN true ELSE false END FROM Quiz q JOIN QuizAttempt qa ON qa.quiz = q WHERE q.module.id = :moduleId AND qa.user.id = :userId AND qa.isPassed = true")
     boolean hasUserPassedAllModuleQuizzes(@Param("userId") Long userId, @Param("moduleId") Long moduleId);
