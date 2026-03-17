@@ -5,7 +5,7 @@
 
 /* Buttons */
 .btn-primary {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: #3b82f6;
   color: white;
   border: none;
   padding: 0.875rem 1.5rem;
@@ -13,17 +13,15 @@
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  transition: background 0.2s;
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+  background: #2563eb;
 }
 
 .btn-primary-small {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: #3b82f6;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -31,18 +29,17 @@
   font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.2s;
 }
 
 .btn-primary-small:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  background: #2563eb;
 }
 
 .btn-link {
   background: none;
   border: none;
-  color: #6366f1;
+  color: #3b82f6;
   font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
@@ -129,10 +126,6 @@
   cursor: not-allowed;
 }
 
-.btn-action:disabled:hover {
-  transform: none;
-}
-
 .action-buttons {
   display: flex;
   gap: 0.5rem;
@@ -142,9 +135,10 @@
 /* Admin Card */
 .admin-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
 }
 
 .admin-card.full-width {
@@ -263,7 +257,7 @@
 }
 
 .role-badge.admin {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  background: #fef3c7;
   color: #92400e;
 }
 

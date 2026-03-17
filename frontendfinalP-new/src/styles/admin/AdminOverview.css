@@ -14,18 +14,18 @@
 
 .stat-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 1.5rem;
   display: flex;
   align-items: center;
   gap: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: all 0.2s;
+  border: 1px solid #e5e7eb;
+  transition: box-shadow 0.2s;
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .stat-icon {
@@ -63,7 +63,7 @@
 }
 
 .stat-icon.lessons {
-  background: #e0e7ff;
+  background: #dbeafe;
 }
 
 .stat-icon.admins {
@@ -126,7 +126,7 @@
 
 .action-card {
   background: white;
-  border: 2px solid #e5e7eb;
+  border: 1.5px solid #e5e7eb;
   border-radius: 12px;
   padding: 1.5rem;
   display: flex;
@@ -138,9 +138,8 @@
 }
 
 .action-card:hover {
-  border-color: #6366f1;
-  background: #f5f3ff;
-  transform: translateY(-2px);
+  border-color: #3b82f6;
+  background: #eff6ff;
 }
 
 .action-icon {
