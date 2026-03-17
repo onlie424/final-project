@@ -36,6 +36,9 @@ public class QuizService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private LessonRepository lessonRepository;
+
     public QuizDTO createQuiz(CreateQuizDTO dto) {
         Module module = moduleRepository.findById(dto.getModuleId())
                 .orElseThrow(() -> new RuntimeException("Module not found with id: " + dto.getModuleId()));
@@ -69,6 +72,16 @@ public class QuizService {
         question.setPoints(dto.getPoints() != null ? dto.getPoints() : 1);
         question.setDifficultyLevel(dto.getDifficultyLevel() != null ? dto.getDifficultyLevel() : "EASY");
 
+        // Link to a specific lesson if provided
+        if (dto.getLessonId() != null) {
+            Lesson lesson = lessonRepository.findById(dto.getLessonId())
+                    .orElseThrow(() -> new RuntimeException("Lesson not found with id: " + dto.getLessonId()));
+            if (!lesson.getModule().getId().equals(quiz.getModule().getId())) {
+                throw new RuntimeException("Lesson does not belong to the same module as this quiz");
+            }
+            question.setLesson(lesson);
+        }
+
         // Auto-set order index if not provided
         if (dto.getOrderIndex() != null) {
             question.setOrderIndex(dto.getOrderIndex());
@@ -92,6 +105,26 @@ public class QuizService {
         }
 
         return convertToQuestionDTO(savedQuestion);
+    }
+
+    @Transactional
+    public QuestionDTO updateQuestionLesson(Long questionId, Long lessonId) {
+        Question question = questionRepository.findById(questionId)
+                .orElseThrow(() -> new RuntimeException("Question not found with id: " + questionId));
+
+        if (lessonId != null) {
+            Lesson lesson = lessonRepository.findById(lessonId)
+                    .orElseThrow(() -> new RuntimeException("Lesson not found with id: " + lessonId));
+            if (!lesson.getModule().getId().equals(question.getQuiz().getModule().getId())) {
+                throw new RuntimeException("Lesson does not belong to the same module as this quiz");
+            }
+            question.setLesson(lesson);
+        } else {
+            question.setLesson(null);
+        }
+
+        questionRepository.save(question);
+        return convertToAdminQuestionDTO(question);
     }
 
     public List<QuizDTO> getQuizzesForModule(Long moduleId) {
@@ -273,6 +306,11 @@ public class QuizService {
         dto.setDifficultyLevel(question.getDifficultyLevel());
         dto.setCorrectAnswer(question.getCorrectAnswer());
         dto.setExplanation(question.getExplanation());
+
+        if (question.getLesson() != null) {
+            dto.setLessonId(question.getLesson().getId());
+            dto.setLessonTitle(question.getLesson().getTitle());
+        }
 
         if ("MULTIPLE_CHOICE".equals(question.getQuestionType())) {
             List<QuestionOption> options = questionOptionRepository

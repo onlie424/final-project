@@ -14,5 +14,6 @@ public class CreateQuestionDTO {
     private Integer points;
     private Integer orderIndex;
     private String difficultyLevel; // "EASY", "MEDIUM", "HARD"
+    private Long lessonId; // Optional - links question to a specific lesson for targeted recommendations
     private List<CreateQuestionOptionDTO> options; // For MULTIPLE_CHOICE
 }

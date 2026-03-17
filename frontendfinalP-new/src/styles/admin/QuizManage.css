@@ -392,6 +392,47 @@ select option[value="HARD"] { color: #dc2626; }
   color: #475569;
 }
 
+/* Field Hint */
+.field-hint {
+  display: block;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-top: 0.25rem;
+}
+
+/* Inline Lesson Selector on Question Card */
+.rq-lesson-select {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.rq-lesson-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.rq-lesson-dropdown {
+  flex: 1;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  color: #334155;
+  background: #f8fafc;
+  cursor: pointer;
+  max-width: 350px;
+}
+
+.rq-lesson-dropdown:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .quiz-manage-page {

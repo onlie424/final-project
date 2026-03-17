@@ -21,6 +21,14 @@ export const quizService = {
     return response.data;
   },
 
+  // Update a question's linked lesson
+  updateQuestionLesson: async (questionId, lessonId) => {
+    const response = await axios.patch(`/api/quizzes/questions/${questionId}/lesson`, null, {
+      params: lessonId ? { lessonId } : {},
+    });
+    return response.data;
+  },
+
   // Delete a question
   deleteQuestion: async (questionId) => {
     await axios.delete(`/api/quizzes/questions/${questionId}`);

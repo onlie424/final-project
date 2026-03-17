@@ -8,9 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -108,6 +106,7 @@ public class AdaptiveQuizService {
         int correctCount = 0;
         int totalQuestions = dto.getAnswers().size();
         List<QuestionResultDTO> questionResults = new ArrayList<>();
+        List<Question> failedQuestions = new ArrayList<>();
 
         // Grade each answer
         for (QuizAnswerDTO answer : dto.getAnswers()) {
@@ -125,7 +124,11 @@ public class AdaptiveQuizService {
             response.setPointsEarned(isCorrect ? question.getPoints() : 0);
             questionResponseRepository.save(response);
 
-            if (isCorrect) correctCount++;
+            if (isCorrect) {
+                correctCount++;
+            } else {
+                failedQuestions.add(question);
+            }
 
             QuestionResultDTO resultDTO = new QuestionResultDTO();
             resultDTO.setQuestionId(question.getId());
@@ -190,10 +193,27 @@ public class AdaptiveQuizService {
             result.setNextDifficulty(null);
             result.setNextQuestions(null);
 
-            // Get lessons to revisit from this module
-            Module module = attempt.getQuiz().getModule();
-            List<Lesson> lessons = lessonRepository.findByModuleIdOrderByOrderIndexAsc(module.getId());
-            result.setLessonsToRevisit(lessons.stream()
+            // Get targeted lessons to revisit based on failed questions
+            List<Lesson> lessonsToRevisit = failedQuestions.stream()
+                    .map(Question::getLesson)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            if (lessonsToRevisit.isEmpty()) {
+                // No failed questions have lesson links (old data) — fall back to all module lessons
+                Module module = attempt.getQuiz().getModule();
+                lessonsToRevisit = lessonRepository.findByModuleIdOrderByOrderIndexAsc(module.getId());
+            }
+
+            // Deduplicate and sort by orderIndex
+            List<Lesson> uniqueLessons = lessonsToRevisit.stream()
+                    .collect(Collectors.toMap(Lesson::getId, l -> l, (a, b) -> a))
+                    .values()
+                    .stream()
+                    .sorted(Comparator.comparing(Lesson::getOrderIndex))
+                    .collect(Collectors.toList());
+
+            result.setLessonsToRevisit(uniqueLessons.stream()
                     .map(this::convertToLessonDTO)
                     .collect(Collectors.toList()));
 

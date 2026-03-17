@@ -12,6 +12,9 @@ public class QuestionDTO {
     private Integer points;
     private String difficultyLevel;
     private List<QuestionOptionDTO> options;
+    // Lesson link (for targeted recommendations)
+    private Long lessonId;
+    private String lessonTitle;
     // Admin-only fields (null for student responses)
     private String correctAnswer;
     private String explanation;

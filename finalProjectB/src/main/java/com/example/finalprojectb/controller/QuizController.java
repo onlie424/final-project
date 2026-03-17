@@ -62,6 +62,16 @@ public class QuizController {
         return ResponseEntity.ok(questions);
     }
 
+    // Update a question's linked lesson
+    @PatchMapping("/questions/{questionId}/lesson")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<QuestionDTO> updateQuestionLesson(
+            @PathVariable Long questionId,
+            @RequestParam(required = false) Long lessonId) {
+        QuestionDTO updated = quizService.updateQuestionLesson(questionId, lessonId);
+        return ResponseEntity.ok(updated);
+    }
+
     // Delete a question
     @DeleteMapping("/questions/{questionId}")
     @PreAuthorize("hasRole('ADMIN')")

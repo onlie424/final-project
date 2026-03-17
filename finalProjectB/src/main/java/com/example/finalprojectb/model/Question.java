@@ -20,6 +20,10 @@ public class Question {
     @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lesson_id")
+    private Lesson lesson; // Optional link to the specific lesson this question tests
+
     @Column(name = "question_text", columnDefinition = "TEXT", nullable = false)
     private String questionText;
 

@@ -42,6 +42,7 @@ function QuizManage() {
     explanation: '',
     points: 1,
     difficultyLevel: 'EASY',
+    lessonId: '',
     options: [
       { optionText: '', isCorrect: false, orderIndex: 1 },
       { optionText: '', isCorrect: false, orderIndex: 2 },
@@ -118,6 +119,17 @@ function QuizManage() {
     }
   };
 
+  const handleUpdateQuestionLesson = async (questionId, lessonId) => {
+    try {
+      await quizService.updateQuestionLesson(questionId, lessonId || null);
+      setSuccess('Lesson updated.');
+      await loadQuizQuestions(selectedQuizId);
+    } catch (err) {
+      console.error('Error updating question lesson:', err);
+      setError('Failed to update lesson.');
+    }
+  };
+
   const handleCreateQuiz = async (e) => {
     e.preventDefault();
     if (!newQuiz.title.trim()) {
@@ -182,6 +194,7 @@ function QuizManage() {
         explanation: newQuestion.explanation,
         points: newQuestion.points,
         difficultyLevel: newQuestion.difficultyLevel,
+        lessonId: newQuestion.lessonId || null,
       };
 
       if (newQuestion.questionType === 'MULTIPLE_CHOICE') {
@@ -210,6 +223,7 @@ function QuizManage() {
       explanation: '',
       points: 1,
       difficultyLevel: 'EASY',
+      lessonId: '',
       options: [
         { optionText: '', isCorrect: false, orderIndex: 1 },
         { optionText: '', isCorrect: false, orderIndex: 2 },
@@ -466,6 +480,21 @@ function QuizManage() {
                               Delete
                             </button>
                           </div>
+                          <div className="rq-lesson-select">
+                            <label className="rq-lesson-label">Lesson:</label>
+                            <select
+                              className="rq-lesson-dropdown"
+                              value={q.lessonId || ''}
+                              onChange={(e) => handleUpdateQuestionLesson(q.id, e.target.value ? parseInt(e.target.value) : null)}
+                            >
+                              <option value="">-- None --</option>
+                              {selectedModule?.lessons?.map(lesson => (
+                                <option key={lesson.id} value={lesson.id}>
+                                  {lesson.orderIndex}. {lesson.title}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
                           <p className="rq-text">{q.questionText}</p>
 
                           {q.questionType === 'MULTIPLE_CHOICE' && q.options && (
@@ -526,6 +555,25 @@ function QuizManage() {
                         <option value="SHORT_ANSWER">Short Answer</option>
                       </select>
                     </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Related Lesson (Optional)</label>
+                    <select
+                      value={newQuestion.lessonId}
+                      onChange={(e) => setNewQuestion(prev => ({
+                        ...prev,
+                        lessonId: e.target.value ? parseInt(e.target.value) : ''
+                      }))}
+                    >
+                      <option value="">-- No specific lesson --</option>
+                      {selectedModule?.lessons?.map(lesson => (
+                        <option key={lesson.id} value={lesson.id}>
+                          {lesson.orderIndex}. {lesson.title}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="field-hint">Links this question to a lesson for targeted study recommendations</span>
                   </div>
 
                   <div className="form-group">
