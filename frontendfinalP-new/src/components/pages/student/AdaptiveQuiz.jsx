@@ -9,6 +9,7 @@ const PHASES = {
   IN_ROUND: 'IN_ROUND',
   ROUND_RESULT: 'ROUND_RESULT',
   QUIZ_COMPLETE: 'QUIZ_COMPLETE',
+  ALREADY_PASSED: 'ALREADY_PASSED',
 };
 
 export default function AdaptiveQuiz() {
@@ -23,9 +24,6 @@ export default function AdaptiveQuiz() {
   // Quiz data
   const [quizTitle, setQuizTitle] = useState('');
   const [attemptId, setAttemptId] = useState(null);
-  const [mlPrediction, setMlPrediction] = useState(null);
-  const [mlRecommendation, setMlRecommendation] = useState(null);
-
   // Round data
   const [currentDifficulty, setCurrentDifficulty] = useState('EASY');
   const [questions, setQuestions] = useState([]);
@@ -54,8 +52,6 @@ export default function AdaptiveQuiz() {
       setAttemptId(data.attemptId);
       setCurrentDifficulty(data.currentDifficulty || 'EASY');
       setQuestions(data.questions || []);
-      setMlPrediction(data.mlPrediction);
-      setMlRecommendation(data.mlRecommendation);
       setAnswers({});
       setStartTime(Date.now());
 
@@ -72,7 +68,12 @@ export default function AdaptiveQuiz() {
       setPhase(PHASES.IN_ROUND);
     } catch (err) {
       console.error('Error starting quiz:', err);
-      setError('Failed to start quiz. Please try again.');
+      const message = err?.response?.data?.message || err?.message || '';
+      if (message.includes('QUIZ_ALREADY_PASSED')) {
+        setPhase(PHASES.ALREADY_PASSED);
+      } else {
+        setError('Failed to start quiz. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -156,15 +157,6 @@ export default function AdaptiveQuiz() {
     }
   };
 
-  const getRecommendationInfo = (rec) => {
-    switch (rec) {
-      case 'ready': return { label: 'Ready', color: '#22c55e', bg: '#f0fdf4' };
-      case 'needs_review': return { label: 'Needs Review', color: '#f59e0b', bg: '#fffbeb' };
-      case 'not_ready': return { label: 'Not Ready', color: '#ef4444', bg: '#fef2f2' };
-      default: return { label: 'Unknown', color: '#64748b', bg: '#f8fafc' };
-    }
-  };
-
   const renderPreQuiz = () => (
     <div className="quiz-pre">
       <div className="quiz-pre-card">
@@ -193,34 +185,6 @@ export default function AdaptiveQuiz() {
             <span className="qi-value">70% per round</span>
           </div>
         </div>
-
-        {mlPrediction !== null && (
-          <div className="ml-prediction-card" style={{ borderColor: getRecommendationInfo(mlRecommendation).color }}>
-            <div className="ml-pred-header">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />
-              </svg>
-              <span>AI Readiness Assessment</span>
-            </div>
-            <div className="ml-pred-body">
-              <div className="ml-pred-score">
-                <div className="score-circle" style={{ borderColor: getRecommendationInfo(mlRecommendation).color }}>
-                  <span>{Math.round(mlPrediction * 100)}%</span>
-                </div>
-                <span className="pred-label">Success Probability</span>
-              </div>
-              <div
-                className="ml-pred-badge"
-                style={{
-                  color: getRecommendationInfo(mlRecommendation).color,
-                  background: getRecommendationInfo(mlRecommendation).bg,
-                }}
-              >
-                {getRecommendationInfo(mlRecommendation).label}
-              </div>
-            </div>
-          </div>
-        )}
 
         <button className="btn-start-quiz" onClick={handleStartQuiz} disabled={loading}>
           {loading ? 'Starting...' : 'Start Quiz'}
@@ -544,6 +508,27 @@ export default function AdaptiveQuiz() {
     );
   };
 
+  const renderAlreadyPassed = () => (
+    <div className="quiz-complete">
+      <div className="complete-banner passed">
+        <div className="complete-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+          </svg>
+        </div>
+        <h1>Quiz Already Completed</h1>
+        <p className="complete-subtitle">
+          You have already passed this quiz. Head back to the classroom to continue with the next module.
+        </p>
+      </div>
+      <div className="complete-actions">
+        <button className="btn-back-classroom" onClick={handleBackToClassroom}>
+          Back to Classroom
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="adaptive-quiz-container">
       <header className="aq-header">
@@ -573,6 +558,7 @@ export default function AdaptiveQuiz() {
         {phase === PHASES.IN_ROUND && renderInRound()}
         {phase === PHASES.ROUND_RESULT && renderRoundResult()}
         {phase === PHASES.QUIZ_COMPLETE && renderQuizComplete()}
+        {phase === PHASES.ALREADY_PASSED && renderAlreadyPassed()}
       </main>
     </div>
   );

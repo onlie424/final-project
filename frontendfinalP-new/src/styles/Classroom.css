@@ -804,19 +804,133 @@
 }
 
 .lesson-item.quiz-item:hover {
-  background: #f5f3ff;
-  border-left-color: #6366f1;
+  background: #eff6ff;
+  border-left-color: #3b82f6;
 }
 
 .quiz-icon {
   width: 20px;
   height: 20px;
-  color: #6366f1;
+  color: #3b82f6;
 }
 
 .quiz-meta {
-  color: #6366f1 !important;
+  color: #3b82f6 !important;
   font-weight: 500;
+}
+
+/* Locked module styles */
+.module-item.locked > .module-header {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.module-item.completed > .module-header {
+  background: #f0fdf4;
+}
+
+.lock-icon {
+  width: 18px;
+  height: 18px;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.lock-icon-small {
+  width: 16px;
+  height: 16px;
+  color: #9ca3af;
+}
+
+.module-completed-icon {
+  width: 18px;
+  height: 18px;
+  color: #22c55e;
+  flex-shrink: 0;
+}
+
+.module-status-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Locked lesson item */
+.lesson-item.locked-lesson {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.lesson-item.locked-lesson:hover {
+  background: transparent;
+}
+
+/* Passed quiz item */
+.lesson-item.quiz-passed {
+  cursor: default;
+  pointer-events: none;
+  background: #f0fdf4;
+  border-left-color: #22c55e;
+}
+
+.lesson-item.quiz-passed .check-icon {
+  color: #22c55e;
+}
+
+.quiz-complete-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #16a34a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+  display: block;
+}
+
+/* Locked content overlay in main area */
+.content-locked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  background: #f9fafb;
+  border-radius: 12px;
+  border: 2px dashed #d1d5db;
+  margin: 2rem;
+}
+
+.content-locked .locked-icon {
+  width: 64px;
+  height: 64px;
+  background: #f3f4f6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.content-locked .locked-icon svg {
+  width: 32px;
+  height: 32px;
+  color: #9ca3af;
+}
+
+.content-locked h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 0.75rem 0;
+}
+
+.content-locked p {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin: 0;
+  max-width: 320px;
 }
 
 /* Responsive */

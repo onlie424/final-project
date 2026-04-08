@@ -207,8 +207,7 @@ export default function CourseDetail() {
                       {module.lessons.map((lesson, lIndex) => (
                         <div key={lesson.id || lIndex} className="lesson-list-item">
                           <span className="lesson-type-icon">
-                            {lesson.contentType === 'VIDEO' ? '▶' :
-                             lesson.contentType === 'PDF' ? '📄' : '📝'}
+                            {'▶'}
                           </span>
                           <span className="lesson-list-title">{lesson.title}</span>
                         </div>

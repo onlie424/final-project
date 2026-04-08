@@ -16,6 +16,4 @@ public class AdaptiveRoundResultDTO {
     private Boolean quizPassed;
     private List<QuestionResultDTO> questionResults;
     private List<LessonDTO> lessonsToRevisit;
-    private Double mlPrediction;
-    private String mlRecommendation;
 }

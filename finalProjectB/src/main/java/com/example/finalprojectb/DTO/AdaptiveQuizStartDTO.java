@@ -11,7 +11,5 @@ public class AdaptiveQuizStartDTO {
     private String quizTitle;
     private String currentDifficulty;
     private List<QuestionDTO> questions;
-    private Double mlPrediction;
-    private String mlRecommendation;
     private Boolean resumedFromPreviousAttempt = false;
 }

@@ -1,6 +1,5 @@
 package com.example.finalprojectb.service;
 
-import com.example.finalprojectb.DTO.MLPredictionResponseDTO;
 import com.example.finalprojectb.DTO.ModuleLockStatusDTO;
 import com.example.finalprojectb.model.Module;
 import com.example.finalprojectb.model.Quiz;
@@ -26,11 +25,6 @@ public class ModuleLockService {
     @Autowired
     private QuizRepository quizRepository;
 
-    @Autowired
-    private ProficiencyService proficiencyService;
-
-    private static final double ML_READINESS_THRESHOLD = 0.4;
-
     @Transactional
     public List<ModuleLockStatusDTO> getCourseModuleLockStatus(Long userId, Long courseId) {
         List<Module> modules = moduleRepository.findByCourseIdOrderByOrderIndexAsc(courseId);
@@ -50,13 +44,11 @@ public class ModuleLockService {
                 status.setIsLocked(false);
                 status.setLockReason(null);
                 status.setPrerequisiteQuizPassed(true);
-                status.setMlReadinessProbability(1.0);
             } else if (previousLocked) {
                 // If previous module was locked, this one is locked too (cascade)
                 status.setIsLocked(true);
                 status.setLockReason("prerequisite_not_met");
                 status.setPrerequisiteQuizPassed(false);
-                status.setMlReadinessProbability(null);
             } else {
                 // Check if user passed all quizzes in the previous module
                 Module previousModule = modules.get(i - 1);
@@ -65,7 +57,6 @@ public class ModuleLockService {
 
                 boolean previousPassed;
                 if (previousQuizzes.isEmpty()) {
-                    // No quizzes in previous module means it's automatically passed
                     previousPassed = true;
                 } else {
                     previousPassed = quizAttemptRepository
@@ -75,33 +66,12 @@ public class ModuleLockService {
                 status.setPrerequisiteQuizPassed(previousPassed);
 
                 if (!previousPassed) {
-                    // Previous module quiz not passed
                     status.setIsLocked(true);
                     status.setLockReason("prerequisite_not_met");
-                    status.setMlReadinessProbability(null);
                 } else {
-                    // Previous passed - check ML readiness
-                    List<Quiz> currentQuizzes = quizRepository
-                            .findByModuleIdOrderByOrderIndexAsc(module.getId());
-
-                    if (!currentQuizzes.isEmpty()) {
-                        MLPredictionResponseDTO prediction = proficiencyService
-                                .getPrediction(userId, currentQuizzes.get(0).getId());
-                        status.setMlReadinessProbability(prediction.getSuccessProbability());
-
-                        if (prediction.getSuccessProbability() < ML_READINESS_THRESHOLD) {
-                            status.setIsLocked(true);
-                            status.setLockReason("ml_not_ready");
-                        } else {
-                            status.setIsLocked(false);
-                            status.setLockReason(null);
-                        }
-                    } else {
-                        // No quizzes in current module - unlock it
-                        status.setIsLocked(false);
-                        status.setLockReason(null);
-                        status.setMlReadinessProbability(1.0);
-                    }
+                    // Previous module passed — unlock this module
+                    status.setIsLocked(false);
+                    status.setLockReason(null);
                 }
             }
 

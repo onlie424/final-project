@@ -25,7 +25,7 @@ public class Lesson {
     private String title;
 
     @Column(name = "content_type", nullable = false, length = 50)
-    private String contentType; // "VIDEO", "ARTICLE", "PDF"
+    private String contentType; // "VIDEO"
 
     @Column(name = "content_url", length = 500)
     private String contentUrl; // YouTube link, PDF link, etc.

@@ -537,6 +537,283 @@
   font-size: 1rem;
 }
 
+/* ============================================================
+   db-* Layout Classes (new professional dashboard layout)
+   ============================================================ */
+
+/* Sidebar mini progress */
+.sidebar-mini-progress {
+  height: 3px;
+  background: #e5e7eb;
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 0.3rem 0 0.1rem 0;
+}
+
+.sidebar-mini-fill {
+  height: 100%;
+  background: #3b82f6;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* Welcome banner */
+.db-welcome {
+  background: white;
+  border-radius: 14px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.db-welcome-left h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.25rem 0;
+}
+
+.db-welcome-left p {
+  color: #6b7280;
+  margin: 0;
+  font-size: 0.925rem;
+}
+
+/* Stats row */
+.db-stats-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.db-stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f8faff;
+  border: 1px solid #dbeafe;
+  border-radius: 12px;
+  padding: 0.875rem 1.25rem;
+  min-width: 80px;
+  text-align: center;
+}
+
+.db-stat-icon {
+  font-size: 1.375rem;
+  margin-bottom: 0.25rem;
+}
+
+.db-stat-val {
+  font-size: 1.375rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.db-stat-lbl {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  font-weight: 500;
+  margin-top: 0.2rem;
+}
+
+/* Generic white card */
+.db-card {
+  background: white;
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+}
+
+/* Two-column layout */
+.db-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Feed row: wider left, narrower right */
+.db-feed-row {
+  grid-template-columns: 3fr 2fr;
+}
+
+/* Section card */
+.db-section {
+  margin-bottom: 1.5rem;
+}
+
+.db-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1.25rem;
+}
+
+.db-section-header h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.db-section-header p {
+  font-size: 0.875rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
+/* Course grid */
+.db-course-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.db-course-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  background: #fafafa;
+}
+
+.db-course-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.09);
+}
+
+.db-course-thumb {
+  height: 110px;
+  background: #dbeafe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.db-course-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.db-completed-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background: #22c55e;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.db-course-body {
+  padding: 0.875rem 1rem 1rem;
+}
+
+.db-course-body h3 {
+  font-size: 0.925rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.3rem 0;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.db-course-body h3:hover {
+  color: #3b82f6;
+}
+
+.db-course-meta {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin: 0 0 0.6rem 0;
+}
+
+.db-progress-bar {
+  height: 5px;
+  background: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.6rem;
+}
+
+.db-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.db-course-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.db-pct-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.db-course-footer button {
+  padding: 0.35rem 0.8rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.db-course-footer button:hover {
+  background: #2563eb;
+}
+
+/* Enroll button for recommended courses */
+.db-enroll-btn {
+  width: 100%;
+  padding: 0.5rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.825rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background 0.2s;
+}
+
+.db-enroll-btn:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.db-enroll-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .dashboard-sidebar {
@@ -568,5 +845,37 @@
 
   .search-bar {
     display: none;
+  }
+
+  .db-two-col,
+  .db-feed-row {
+    grid-template-columns: 1fr;
+  }
+
+  .db-welcome {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.25rem;
+  }
+
+  .db-stats-row {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .db-stat-card {
+    flex: 1;
+    min-width: 60px;
+    padding: 0.625rem 0.5rem;
+  }
+
+  .db-course-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .db-course-grid {
+    grid-template-columns: 1fr;
   }
 }

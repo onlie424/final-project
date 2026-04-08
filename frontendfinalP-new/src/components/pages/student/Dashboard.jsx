@@ -3,22 +3,30 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { courseService } from '../../../services/courseService';
 import { enrollmentService } from '../../../services/enrollmentService';
+import { quizService } from '../../../services/quizService';
+import CurrentFocus from '../../dashboard/CurrentFocus';
+import ProgressOverview from '../../dashboard/ProgressOverview';
+import ActivityFeed from '../../dashboard/ActivityFeed';
+import Recommendations from '../../dashboard/Recommendations';
 import '../../../styles/Dashboard.css';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [allCourses, setAllCourses] = useState([]);
-  const [stats, setStats] = useState({
-    totalCoursesEnrolled: 0,
-    completedLessons: 0,
-    totalLessons: 0,
-    streak: 0,
-  });
   const [enrollingCourseId, setEnrollingCourseId] = useState(null);
+  const [dashboardData, setDashboardData] = useState({
+    overallProgress: 0,
+    coursesCompleted: 0,
+    focusCourse: null,
+    activities: [],
+    masteryGaps: [],
+    suggestions: [],
+  });
 
   useEffect(() => {
     fetchDashboardData();
@@ -29,102 +37,180 @@ export default function Dashboard() {
       setLoading(true);
       setError(null);
 
-      // Fetch all available courses
-      const coursesData = await courseService.getAllCourses();
-      setAllCourses(coursesData);
+      const [allCoursesData, enrollments] = await Promise.all([
+        courseService.getAllCourses(),
+        user?.userId ? enrollmentService.getUserEnrollments(user.userId) : Promise.resolve([]),
+      ]);
 
-      // Fetch enrolled courses if user has userId
-      if (user?.userId) {
-        try {
-          const enrollments = await enrollmentService.getUserEnrollments(user.userId);
+      setAllCourses(allCoursesData || []);
 
-          // Get course details for each enrollment
-          const enrolledCoursesData = await Promise.all(
-            enrollments.map(async (enrollment) => {
-              try {
-                const course = await courseService.getCourseById(enrollment.courseId, user.userId);
-                return { ...course, enrollmentId: enrollment.id, progress: enrollment.progress || 0 };
-              } catch {
-                return null;
-              }
-            })
-          );
-
-          const validCourses = enrolledCoursesData.filter(c => c !== null);
-          setEnrolledCourses(validCourses);
-
-          // Calculate stats from real data
-          const totalLessons = validCourses.reduce((sum, c) => sum + (c.totalLessons || 0), 0);
-          setStats({
-            totalCoursesEnrolled: validCourses.length,
-            completedLessons: 0,
-            totalLessons: totalLessons,
-            streak: user?.loginStreak || 0,
-          });
-        } catch (enrollError) {
-          console.log('No enrollments found or error:', enrollError);
-          setEnrolledCourses([]);
-        }
+      if (!enrollments?.length) {
+        setEnrolledCourses([]);
+        setLoading(false);
+        return;
       }
 
+      const courseDetails = await Promise.all(
+        enrollments.map(async (enrollment) => {
+          try {
+            const course = await courseService.getCourseById(enrollment.courseId, user?.userId);
+            const progress = enrollment.completionPercentage ?? enrollment.progress ?? 0;
+            return {
+              ...course,
+              enrollmentId: enrollment.id,
+              completionPercentage: Math.round(progress),
+              status: enrollment.status || 'IN_PROGRESS',
+            };
+          } catch {
+            return null;
+          }
+        })
+      );
+
+      const valid = courseDetails.filter(Boolean);
+      setEnrolledCourses(valid);
+
+      // Fetch real recommendation data for all enrolled courses in parallel
+      const recResults = valid.length > 0
+        ? await Promise.allSettled(
+            valid.map((c) => quizService.getRecommendations(c.id, user.userId).catch(() => null))
+          )
+        : [];
+
+      computeDashboardData(valid, allCoursesData || [], recResults);
     } catch (err) {
-      console.error('Error fetching dashboard data:', err);
+      console.error('Error fetching dashboard:', err);
       setError('Failed to load dashboard data.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEnrollCourse = async (courseId) => {
-    if (!user?.userId) {
-      setError('Please log out and log back in to enroll in courses');
-      return;
-    }
+  const computeDashboardData = (courses, _allCoursesData, recResults = []) => {
+    if (!courses.length) return;
 
+    const totalProgress = courses.reduce((s, c) => s + (c.completionPercentage || 0), 0);
+    const overallProgress = Math.round(totalProgress / courses.length);
+    const coursesCompleted = courses.filter(
+      (c) => c.status === 'COMPLETED' || c.completionPercentage >= 100
+    ).length;
+
+    const inProgress = courses.filter(
+      (c) => c.completionPercentage > 0 && c.completionPercentage < 100
+    );
+    const focusCourse =
+      inProgress.length > 0
+        ? inProgress.reduce((max, c) =>
+            c.completionPercentage > max.completionPercentage ? c : max
+          )
+        : courses[0];
+
+    const activities = courses.map((course) => {
+      if (course.completionPercentage >= 100 || course.status === 'COMPLETED') {
+        return {
+          id: `done-${course.id}`,
+          icon: '🏆',
+          title: 'Course Completed',
+          description: course.title,
+          time: 'Done',
+          priority: 'low',
+          courseId: course.id,
+        };
+      }
+      if (course.completionPercentage > 0) {
+        return {
+          id: `prog-${course.id}`,
+          icon: '📖',
+          title: 'In Progress',
+          description: `${course.title} — ${course.completionPercentage}% complete`,
+          time: `${course.completionPercentage}%`,
+          priority: 'medium',
+          courseId: course.id,
+        };
+      }
+      return {
+        id: `new-${course.id}`,
+        icon: '🚀',
+        title: 'Ready to Start',
+        description: course.title,
+        time: 'New',
+        priority: 'high',
+        courseId: course.id,
+      };
+    });
+
+    activities.sort((a, b) => {
+      const order = { high: 0, medium: 1, low: 2 };
+      return order[a.priority] - order[b.priority];
+    });
+
+    // Real recommendation data from quiz attempt history
+    const masteryGaps = recResults
+      .filter((r) => r.status === 'fulfilled' && r.value)
+      .flatMap((r) => r.value.weakLessons || [])
+      .sort((a, b) => b.failCount - a.failCount)
+      .slice(0, 4)
+      .map((w) => ({
+        id: w.lessonId,
+        topic: w.lessonTitle,
+        moduleLabel: w.moduleTitle,
+        mastery: w.severity === 'STRONG_REVIEW' ? 15 : w.severity === 'REVIEW' ? 40 : 65,
+        status: w.severity === 'STRONG_REVIEW' ? 'needs-review' : 'practice-recommended',
+        severity: w.severity,
+        quizPassed: w.quizPassed,
+        courseId: w.courseId,
+      }));
+
+    const suggestions = recResults
+      .filter((r) => r.status === 'fulfilled' && r.value?.nextStep)
+      .slice(0, 2)
+      .map((r) => {
+        const ns = r.value.nextStep;
+        return {
+          id: `next-${ns.moduleId}`,
+          text: ns.firstLessonTitle
+            ? `Next: "${ns.firstLessonTitle}" in ${ns.moduleTitle}`
+            : `Start module: ${ns.moduleTitle}`,
+          icon: '▶️',
+          courseId: ns.courseId,
+        };
+      });
+
+    setDashboardData({ overallProgress, coursesCompleted, focusCourse, activities, masteryGaps, suggestions });
+  };
+
+  const handleEnrollCourse = async (courseId) => {
+    if (!user?.userId) return;
     try {
       setEnrollingCourseId(courseId);
       setError(null);
       await enrollmentService.enrollInCourse(user.userId, courseId);
       await fetchDashboardData();
     } catch (err) {
-      console.error('Error enrolling in course:', err);
-      const errorMessage = err.response?.data?.message || 'Failed to enroll in course. Please try again.';
-      setError(errorMessage);
+      setError(err.response?.data?.message || 'Failed to enroll.');
     } finally {
       setEnrollingCourseId(null);
     }
   };
 
-  const handleCourseClick = (courseId) => {
-    navigate(`/courses/${courseId}`);
-  };
-
-  const handleStartLearning = (courseId) => {
-    navigate(`/classroom/${courseId}`);
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
   const getInitials = (name) => {
     if (!name) return 'U';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
   if (loading) {
     return (
       <div className="dashboard-loading">
-        <div className="spinner"></div>
+        <div className="spinner" />
         <p>Loading your dashboard...</p>
       </div>
     );
   }
 
-  // Get recommended courses (courses not enrolled in)
-  const enrolledIds = enrolledCourses.map(c => c.id);
-  const recommendedCourses = allCourses.filter(c => !enrolledIds.includes(c.id)).slice(0, 4);
+  const enrolledIds = enrolledCourses.map((c) => c.id);
+  const recommendedCourses = allCourses.filter((c) => !enrolledIds.includes(c.id)).slice(0, 4);
+  const { overallProgress, coursesCompleted, focusCourse, activities, masteryGaps, suggestions } =
+    dashboardData;
 
   return (
     <div className="dashboard-layout">
@@ -134,45 +220,48 @@ export default function Dashboard() {
           <a href="/" className="logo">BrainPath</a>
         </div>
         <div className="topnav-right">
-          <div className="user-info" onClick={handleLogout}>
-            <div className="user-avatar">
-              {getInitials(user?.fullName)}
-            </div>
+          <div className="user-info" onClick={() => { logout(); navigate('/'); }}>
+            <div className="user-avatar">{getInitials(user?.fullName)}</div>
             <span className="user-name">{user?.fullName || 'Student'}</span>
-            <span>▼</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ opacity: 0.5 }}>
+              <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z" />
+            </svg>
           </div>
         </div>
       </nav>
 
-      {/* Sidebar - Show all enrolled courses */}
+      {/* Sidebar */}
       {enrolledCourses.length > 0 && (
         <aside className="dashboard-sidebar">
           <div className="sidebar-header">
             <h2 className="sidebar-title">My Courses</h2>
             <span className="sidebar-count">{enrolledCourses.length}</span>
           </div>
-
           <div className="sidebar-courses-list">
             {enrolledCourses.map((course) => (
               <div key={course.id} className="sidebar-course-item">
                 <div
                   className="sidebar-course-info"
-                  onClick={() => handleCourseClick(course.id)}
+                  onClick={() => navigate(`/courses/${course.id}`)}
                 >
                   <div className="sidebar-course-icon">📚</div>
                   <div className="sidebar-course-text">
                     <p className="sidebar-course-name">{course.title}</p>
-                    <span className="sidebar-course-meta">
-                      {course.totalLessons || 0} lessons · {course.difficulty || 'Beginner'}
-                    </span>
+                    <span className="sidebar-course-meta">{course.completionPercentage}% complete</span>
                   </div>
+                </div>
+                <div className="sidebar-mini-progress">
+                  <div
+                    className="sidebar-mini-fill"
+                    style={{ width: `${course.completionPercentage || 0}%` }}
+                  />
                 </div>
                 <div className="sidebar-course-actions">
                   <button
                     className="sidebar-btn-learn"
-                    onClick={() => handleStartLearning(course.id)}
+                    onClick={() => navigate(`/classroom/${course.id}`)}
                   >
-                    {course.progress > 0 ? 'Continue' : 'Start'}
+                    {course.completionPercentage > 0 ? 'Continue' : 'Start'}
                   </button>
                 </div>
               </div>
@@ -182,8 +271,10 @@ export default function Dashboard() {
       )}
 
       {/* Main Content */}
-      <main className="dashboard-main" style={enrolledCourses.length === 0 ? { marginLeft: 0, maxWidth: '100%' } : {}}>
-        {/* Error Message */}
+      <main
+        className="dashboard-main"
+        style={enrolledCourses.length === 0 ? { marginLeft: 0, maxWidth: '100%' } : {}}
+      >
         {error && (
           <div className="error-banner">
             <p>{error}</p>
@@ -191,119 +282,148 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Welcome Section */}
-        <div className="welcome-section">
-          <div className="welcome-header">
-            <div className="welcome-text">
-              <h1>Welcome back, {user?.fullName || 'Student'}!</h1>
-              <p>Continue your learning journey and achieve your goals</p>
-            </div>
-            <div className="streak-badge">
-              <span>🔥</span>
-              <span>{stats.streak} day streak</span>
-            </div>
+        {/* Welcome + Stats */}
+        <div className="db-welcome">
+          <div className="db-welcome-left">
+            <h1>Welcome back, {user?.fullName?.split(' ')[0] || 'Student'}!</h1>
+            <p>Track your progress and keep the momentum going</p>
           </div>
-
-          <div className="progress-cards">
-            <div className="progress-card">
-              <div className="progress-card-icon">📚</div>
-              <div className="progress-card-value">{stats.totalCoursesEnrolled}</div>
-              <div className="progress-card-label">Courses Enrolled</div>
+          <div className="db-stats-row">
+            <div className="db-stat-card">
+              <div className="db-stat-icon">📚</div>
+              <div className="db-stat-val">{enrolledCourses.length}</div>
+              <div className="db-stat-lbl">Enrolled</div>
             </div>
-            <div className="progress-card">
-              <div className="progress-card-icon">📖</div>
-              <div className="progress-card-value">{stats.totalLessons}</div>
-              <div className="progress-card-label">Total Lessons</div>
+            <div className="db-stat-card">
+              <div className="db-stat-icon">🎓</div>
+              <div className="db-stat-val">{coursesCompleted}</div>
+              <div className="db-stat-lbl">Completed</div>
             </div>
-            <div className="progress-card">
-              <div className="progress-card-icon">⭐</div>
-              <div className="progress-card-value">Level 1</div>
-              <div className="progress-card-label">Your Level</div>
+            <div className="db-stat-card">
+              <div className="db-stat-icon">📊</div>
+              <div className="db-stat-val">{overallProgress}%</div>
+              <div className="db-stat-lbl">Avg Progress</div>
+            </div>
+            <div className="db-stat-card">
+              <div className="db-stat-icon">🔥</div>
+              <div className="db-stat-val">{user?.loginStreak || 0}</div>
+              <div className="db-stat-lbl">Day Streak</div>
             </div>
           </div>
         </div>
 
-        {/* My Courses Section */}
-        <div className="content-section">
-          <div className="section-header">
-            <h2 className="section-title">My Enrolled Courses</h2>
-          </div>
-
-          {enrolledCourses.length === 0 ? (
-            <div className="empty-state">
-              <div className="empty-state-icon">📚</div>
-              <h3>No Enrolled Courses Yet</h3>
-              <p>Explore our course catalog and start learning today!</p>
+        {/* Progress Overview + Current Focus */}
+        {enrolledCourses.length > 0 && (
+          <div className="db-two-col">
+            <div className="db-card">
+              <ProgressOverview
+                overallProgress={overallProgress}
+                coursesCompleted={coursesCompleted}
+                totalCourses={enrolledCourses.length}
+                enrolledCourses={enrolledCourses}
+              />
             </div>
-          ) : (
-            <div className="course-cards">
+            <div className="db-card">
+              <CurrentFocus
+                course={focusCourse}
+                progress={focusCourse?.completionPercentage || 0}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Activity Feed + Recommendations */}
+        {enrolledCourses.length > 0 && (
+          <div className="db-two-col db-feed-row">
+            <div className="db-card db-feed-wide">
+              <ActivityFeed
+                activities={activities}
+                onNavigate={(courseId) => navigate(`/classroom/${courseId}`)}
+              />
+            </div>
+            <div className="db-card db-rec-narrow">
+              <Recommendations
+                masteryGaps={masteryGaps}
+                suggestions={suggestions}
+                onNavigate={(courseId) => navigate(`/classroom/${courseId}`)}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* My Enrolled Courses */}
+        {enrolledCourses.length > 0 && (
+          <div className="db-card db-section">
+            <div className="db-section-header">
+              <h2>My Enrolled Courses</h2>
+            </div>
+            <div className="db-course-grid">
               {enrolledCourses.map((course) => (
-                <div key={course.id} className="course-card">
+                <div key={course.id} className="db-course-card">
                   <div
-                    className="course-card-image"
-                    onClick={() => handleCourseClick(course.id)}
+                    className="db-course-thumb"
+                    onClick={() => navigate(`/courses/${course.id}`)}
                   >
                     {course.thumbnailUrl ? (
                       <img src={course.thumbnailUrl} alt={course.title} />
                     ) : (
-                      '📖'
+                      <span>📖</span>
+                    )}
+                    {(course.completionPercentage >= 100 || course.status === 'COMPLETED') && (
+                      <div className="db-completed-badge">✓</div>
                     )}
                   </div>
-                  <div className="course-card-body">
-                    <h3
-                      className="course-card-title"
-                      onClick={() => handleCourseClick(course.id)}
-                    >
-                      {course.title}
-                    </h3>
-                    <p className="course-card-meta">
-                      {course.totalLessons || 0} lessons · {course.estimatedHours || 0}h · {course.difficulty || 'Beginner'}
+                  <div className="db-course-body">
+                    <h3 onClick={() => navigate(`/courses/${course.id}`)}>{course.title}</h3>
+                    <p className="db-course-meta">
+                      {course.totalLessons || 0} lessons · {course.difficulty || 'Beginner'}
                     </p>
-                    <div className="course-progress-bar">
+                    <div className="db-progress-bar">
                       <div
-                        className="course-progress-fill"
-                        style={{ width: `${course.progress || 0}%` }}
-                      ></div>
+                        className="db-progress-fill"
+                        style={{ width: `${course.completionPercentage || 0}%` }}
+                      />
                     </div>
-                    <button
-                      className="start-learning-btn"
-                      onClick={() => handleStartLearning(course.id)}
-                    >
-                      {course.progress > 0 ? 'Continue Learning' : 'Start Learning'}
-                    </button>
+                    <div className="db-course-footer">
+                      <span className="db-pct-label">{course.completionPercentage || 0}% complete</span>
+                      <button onClick={() => navigate(`/classroom/${course.id}`)}>
+                        {course.completionPercentage > 0 ? 'Continue →' : 'Start →'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Recommended Courses Section */}
+        {/* Recommended Courses */}
         {recommendedCourses.length > 0 && (
-          <div className="content-section">
-            <div className="section-header">
-              <h2 className="section-title">Recommended for You</h2>
+          <div className="db-card db-section">
+            <div className="db-section-header">
+              <h2>Recommended for You</h2>
+              <p>Expand your knowledge</p>
             </div>
-
-            <div className="course-cards">
+            <div className="db-course-grid">
               {recommendedCourses.map((course) => (
-                <div key={course.id} className="course-card">
-                  <div className="course-card-image" style={{
-                    background: course.thumbnailUrl ? 'none' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                  }}>
+                <div key={course.id} className="db-course-card">
+                  <div
+                    className="db-course-thumb"
+                    onClick={() => navigate(`/courses/${course.id}`)}
+                  >
                     {course.thumbnailUrl ? (
                       <img src={course.thumbnailUrl} alt={course.title} />
                     ) : (
-                      '📚'
+                      <span>📚</span>
                     )}
                   </div>
-                  <div className="course-card-body">
-                    <h3 className="course-card-title">{course.title}</h3>
-                    <p className="course-card-meta">
-                      {course.totalLessons || 0} lessons · {course.estimatedHours || 0}h · {course.difficulty || 'Beginner'}
+                  <div className="db-course-body">
+                    <h3 onClick={() => navigate(`/courses/${course.id}`)}>{course.title}</h3>
+                    <p className="db-course-meta">
+                      {course.totalLessons || 0} lessons · {course.difficulty || 'Beginner'}
                     </p>
                     <button
-                      className="enroll-badge-btn"
+                      className="db-enroll-btn"
                       onClick={() => handleEnrollCourse(course.id)}
                       disabled={enrollingCourseId === course.id}
                     >
@@ -316,32 +436,33 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* All Available Courses (when user has no enrollments) */}
-        {allCourses.length > 0 && enrolledCourses.length === 0 && (
-          <div className="content-section">
-            <div className="section-header">
-              <h2 className="section-title">Available Courses</h2>
+        {/* Empty state */}
+        {enrolledCourses.length === 0 && allCourses.length > 0 && (
+          <div className="db-card db-section">
+            <div className="db-section-header">
+              <h2>Available Courses</h2>
+              <p>Start your learning journey today</p>
             </div>
-
-            <div className="course-cards">
+            <div className="db-course-grid">
               {allCourses.slice(0, 6).map((course) => (
-                <div key={course.id} className="course-card">
-                  <div className="course-card-image" style={{
-                    background: course.thumbnailUrl ? 'none' : 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
-                  }}>
+                <div key={course.id} className="db-course-card">
+                  <div
+                    className="db-course-thumb"
+                    onClick={() => navigate(`/courses/${course.id}`)}
+                  >
                     {course.thumbnailUrl ? (
                       <img src={course.thumbnailUrl} alt={course.title} />
                     ) : (
-                      '📚'
+                      <span>📚</span>
                     )}
                   </div>
-                  <div className="course-card-body">
-                    <h3 className="course-card-title">{course.title}</h3>
-                    <p className="course-card-meta">
-                      {course.totalLessons || 0} lessons · {course.estimatedHours || 0}h · {course.difficulty || 'Beginner'}
+                  <div className="db-course-body">
+                    <h3 onClick={() => navigate(`/courses/${course.id}`)}>{course.title}</h3>
+                    <p className="db-course-meta">
+                      {course.totalLessons || 0} lessons · {course.difficulty || 'Beginner'}
                     </p>
                     <button
-                      className="enroll-badge-btn"
+                      className="db-enroll-btn"
                       onClick={() => handleEnrollCourse(course.id)}
                       disabled={enrollingCourseId === course.id}
                     >

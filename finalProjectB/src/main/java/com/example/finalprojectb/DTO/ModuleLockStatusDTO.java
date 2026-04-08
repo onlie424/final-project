@@ -9,6 +9,5 @@ public class ModuleLockStatusDTO {
     private Integer orderIndex;
     private Boolean isLocked;
     private String lockReason;
-    private Double mlReadinessProbability;
     private Boolean prerequisiteQuizPassed;
 }

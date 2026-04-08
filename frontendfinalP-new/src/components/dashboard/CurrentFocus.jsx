@@ -1,21 +1,17 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-
 import '../../styles/dashboard/CurrentFocus.css';
 
-export default function CurrentFocus({ course }) {
+export default function CurrentFocus({ course, progress = 0 }) {
   const navigate = useNavigate();
 
   if (!course) {
     return (
       <div className="current-focus">
-        <h2 className="section-title">📚 Current Focus</h2>
-        <div className="no-course">
-          <p>You haven't enrolled in any courses yet.</p>
-          <button 
-            className="btn-primary"
-            onClick={() => navigate('/courses')}
-          >
+        <h2 className="cf-title">Current Focus</h2>
+        <div className="cf-empty">
+          <span className="cf-empty-icon">🎯</span>
+          <p>No course in progress yet.</p>
+          <button className="cf-btn-browse" onClick={() => navigate('/courses')}>
             Browse Courses
           </button>
         </div>
@@ -23,81 +19,53 @@ export default function CurrentFocus({ course }) {
     );
   }
 
-  // Calculate progress (mock for now - you'll implement this with real data)
-  const currentModule = course.modules?.[0];
-  const currentLesson = currentModule?.lessons?.[0];
-  const progress = 65; // Mock progress
-  const timeRemaining = "2 weeks";
-
-  const handleContinue = () => {
-    if (currentLesson) {
-      navigate(`/lessons/${currentLesson.id}`);
-    }
-  };
+  const clampedProgress = Math.min(100, Math.max(0, Math.round(progress)));
 
   return (
     <div className="current-focus">
-      <h2 className="section-title">📚 Current Focus</h2>
-      
-      <div className="focus-card">
-        <div className="course-info">
-          <div className="course-thumbnail">
-            <img 
-              src={course.thumbnailUrl || 'https://via.placeholder.com/100x60'} 
-              alt={course.title}
-            />
+      <h2 className="cf-title">Current Focus</h2>
+
+      <div className="cf-card">
+        <div className="cf-thumb-row">
+          <div className="cf-thumb">
+            {course.thumbnailUrl ? (
+              <img src={course.thumbnailUrl} alt={course.title} />
+            ) : (
+              <span className="cf-thumb-icon">📖</span>
+            )}
+            <div className="cf-pct-badge">{clampedProgress}%</div>
           </div>
-          <div className="course-details">
-            <h3 className="course-title">{course.title}</h3>
-            <p className="course-subtitle">
-              {currentModule?.title || 'Getting Started'}
-            </p>
-            <p className="lesson-info">
-              {currentLesson?.title || 'First lesson'}
+          <div className="cf-details">
+            <h3 className="cf-course-title">{course.title}</h3>
+            {course.difficulty && (
+              <span className={`cf-difficulty cf-diff-${course.difficulty?.toLowerCase()}`}>
+                {course.difficulty}
+              </span>
+            )}
+            <p className="cf-meta">
+              {course.totalLessons ? `${course.totalLessons} lessons` : ''}
+              {course.totalLessons && course.estimatedHours ? ' · ' : ''}
+              {course.estimatedHours ? `${course.estimatedHours}h` : ''}
             </p>
           </div>
         </div>
 
-        <div className="progress-section">
-          <div className="progress-header">
-            <span className="progress-label">Progress</span>
-            <span className="progress-value">{progress}%</span>
+        <div className="cf-progress-row">
+          <div className="cf-progress-labels">
+            <span>Progress</span>
+            <span className="cf-progress-val">{clampedProgress}%</span>
           </div>
-          <div className="progress-bar">
-            <div 
-              className="progress-fill" 
-              style={{ width: `${progress}%` }}
-            ></div>
+          <div className="cf-progress-track">
+            <div className="cf-progress-fill" style={{ width: `${clampedProgress}%` }} />
           </div>
-          <p className="time-estimate">
-            <span className="time-icon">⏱️</span>
-            Est. completion: {timeRemaining}
-          </p>
         </div>
 
-        <button 
-          className="btn-continue"
-          onClick={handleContinue}
+        <button
+          className="cf-btn-continue"
+          onClick={() => navigate(`/classroom/${course.id}`)}
         >
-          Continue Learning →
+          {clampedProgress > 0 ? 'Continue Learning →' : 'Start Learning →'}
         </button>
-
-        <div className="focus-meta">
-          <div className="meta-item">
-            <span className="meta-icon">📖</span>
-            <span>{course.totalLessons || 0} lessons</span>
-          </div>
-          <div className="meta-item">
-            <span className="meta-icon">⏰</span>
-            <span>{course.estimatedHours || 0}h total</span>
-          </div>
-          <div className="meta-item">
-            <span className="meta-icon">📊</span>
-            <span className={`difficulty-badge ${course.difficulty?.toLowerCase()}`}>
-              {course.difficulty}
-            </span>
-          </div>
-        </div>
       </div>
     </div>
   );

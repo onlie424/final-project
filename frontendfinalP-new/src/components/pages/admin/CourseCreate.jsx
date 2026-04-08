@@ -495,24 +495,12 @@ function CourseCreate() {
                               </div>
 
                               <div className="form-group">
-                                <label>Content Type</label>
-                                <select
-                                  value={lesson.contentType}
-                                  onChange={(e) => updateLesson(module.id, lesson.id, 'contentType', e.target.value)}
-                                >
-                                  <option value="VIDEO">Video</option>
-                                  <option value="PDF">PDF</option>
-                                  <option value="TEXT">Text / Reading</option>
-                                </select>
-                              </div>
-
-                              <div className="form-group">
-                                <label>{lesson.contentType === 'VIDEO' ? 'Video URL' : lesson.contentType === 'PDF' ? 'PDF URL' : 'Content URL'}</label>
+                                <label>Video URL</label>
                                 <input
                                   type="url"
                                   value={lesson.contentUrl}
                                   onChange={(e) => updateLesson(module.id, lesson.id, 'contentUrl', e.target.value)}
-                                  placeholder={lesson.contentType === 'VIDEO' ? 'https://youtube.com/embed/...' : 'https://example.com/file.pdf'}
+                                  placeholder="https://youtube.com/embed/..."
                                 />
                               </div>
 

@@ -68,17 +68,30 @@ export const quizService = {
     return response.data;
   },
 
-  // ==================== ML PREDICTION ====================
-
-  // Get ML prediction for a user on a quiz
-  getPrediction: async (quizId, userId) => {
-    const response = await axios.get(`/api/quizzes/${quizId}/prediction`, {
+  // Get personalised lesson recommendations for a user in a course
+  getRecommendations: async (courseId, userId) => {
+    const response = await axios.get(`/api/quizzes/course/${courseId}/recommendations`, {
       params: { userId },
     });
     return response.data;
   },
 
+  // Recalculate and persist enrollment completion (fixes users affected by prior bug)
+  syncCompletion: async (courseId, userId) => {
+    await axios.post(`/api/quizzes/course/${courseId}/sync-completion`, null, {
+      params: { userId },
+    });
+  },
+
   // ==================== ATTEMPT HISTORY ====================
+
+  // Check if user has fully passed a quiz (all 3 difficulty rounds)
+  hasPassedQuiz: async (quizId, userId) => {
+    const response = await axios.get(`/api/quizzes/${quizId}/passed`, {
+      params: { userId },
+    });
+    return response.data.passed;
+  },
 
   // Get attempt history for a user on a quiz
   getAttempts: async (quizId, userId) => {

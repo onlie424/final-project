@@ -1,79 +1,36 @@
-import React from 'react';
 import '../../styles/dashboard/ActivityFeed.css';
 
-export default function ActivityFeed({ userId }) {
-  // Mock activities - you'll fetch real data from backend
-  const activities = [
-    {
-      id: 1,
-      type: 'quiz-due',
-      icon: '📌',
-      title: 'Quiz Due: Python Basics',
-      description: 'Tomorrow, 2:00 PM',
-      time: 'Due soon',
-      priority: 'high',
-    },
-    {
-      id: 2,
-      type: 'new-lesson',
-      icon: '📺',
-      title: 'New Lesson Available',
-      description: 'Object-Oriented Programming',
-      time: '2 hours ago',
-      priority: 'medium',
-    },
-    {
-      id: 3,
-      type: 'achievement',
-      icon: '🏆',
-      title: 'Achievement Unlocked',
-      description: '7-Day Streak! Keep it up!',
-      time: 'Today',
-      priority: 'low',
-    },
-    {
-      id: 4,
-      type: 'lesson-complete',
-      icon: '✅',
-      title: 'Lesson Completed',
-      description: 'Functions and Parameters',
-      time: '1 day ago',
-      priority: 'low',
-    },
-    {
-      id: 5,
-      type: 'recommendation',
-      icon: '💡',
-      title: 'Recommended for You',
-      description: 'Advanced Functions module based on your progress',
-      time: '2 days ago',
-      priority: 'medium',
-    },
-  ];
+const PRIORITY_CLASS = { high: 'priority-high', medium: 'priority-medium', low: 'priority-low' };
 
-  const getPriorityClass = (priority) => {
-    switch (priority) {
-      case 'high':
-        return 'priority-high';
-      case 'medium':
-        return 'priority-medium';
-      default:
-        return 'priority-low';
-    }
-  };
+export default function ActivityFeed({ activities = [], onNavigate }) {
+  if (!activities.length) {
+    return (
+      <div className="activity-feed">
+        <div className="feed-header">
+          <h2 className="af-title">Activity & Status</h2>
+        </div>
+        <div className="no-activities">
+          <span className="empty-icon">📭</span>
+          <p>No activity yet — enroll in a course to get started!</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="activity-feed">
       <div className="feed-header">
-        <h2 className="section-title">📅 Activity Feed & Upcoming</h2>
-        <button className="btn-view-all">View All</button>
+        <h2 className="af-title">Activity & Status</h2>
+        <span className="af-count">{activities.length} courses</span>
       </div>
 
       <div className="activities-list">
         {activities.map((activity) => (
-          <div 
-            key={activity.id} 
-            className={`activity-item ${getPriorityClass(activity.priority)}`}
+          <div
+            key={activity.id}
+            className={`activity-item ${PRIORITY_CLASS[activity.priority] || 'priority-low'} ${activity.courseId ? 'clickable' : ''}`}
+            onClick={() => activity.courseId && onNavigate?.(activity.courseId)}
+            role={activity.courseId ? 'button' : undefined}
           >
             <div className="activity-icon-wrapper">
               <span className="activity-icon">{activity.icon}</span>
@@ -84,17 +41,15 @@ export default function ActivityFeed({ userId }) {
             </div>
             <div className="activity-time">
               <span className="time-text">{activity.time}</span>
+              {activity.courseId && (
+                <svg className="af-arrow" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                </svg>
+              )}
             </div>
           </div>
         ))}
       </div>
-
-      {activities.length === 0 && (
-        <div className="no-activities">
-          <p>No recent activities</p>
-          <span className="empty-icon">📭</span>
-        </div>
-      )}
     </div>
   );
 }

@@ -1,152 +1,94 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import '../../styles/dashboard/Recommendation.css';
 
-export default function Recommendations({ userId }) {
-  const navigate = useNavigate();
-
-  // Mock data - you'll replace this with ML-powered recommendations later
-  const masteryGaps = [
-    {
-      id: 1,
-      topic: 'While Loops',
-      mastery: 45,
-      status: 'needs-review',
-      lessonId: 3,
-    },
-    {
-      id: 2,
-      topic: 'Functions',
-      mastery: 68,
-      status: 'practice-recommended',
-      lessonId: 4,
-    },
-  ];
-
-  const suggestions = [
-    {
-      id: 1,
-      type: 'peer-comparison',
-      text: 'Ahead of 60% of peers in "Control Flow"',
-      icon: '📈',
-    },
-    {
-      id: 2,
-      type: 'ready-for',
-      text: 'Ready for Advanced Functions',
-      icon: '✨',
-    },
-    {
-      id: 3,
-      type: 'trending',
-      text: 'Object-Oriented Programming is trending',
-      icon: '🔥',
-    },
-  ];
-
-  const getStatusColor = (status) => {
-    if (status === 'needs-review') return 'status-red';
-    if (status === 'practice-recommended') return 'status-orange';
-    return 'status-green';
+export default function Recommendations({ masteryGaps = [], suggestions = [], onNavigate }) {
+  const getStatusLabel = (mastery) => {
+    if (mastery < 25) return { label: 'Needs Review', cls: 'status-red' };
+    if (mastery < 50) return { label: 'Needs Practice', cls: 'status-orange' };
+    return { label: 'Making Progress', cls: 'status-green' };
   };
 
-  const getStatusText = (mastery) => {
-    if (mastery < 60) return 'Needs Review';
-    if (mastery < 75) return 'Practice Recommended';
-    return 'Good Progress';
-  };
+  const hasContent = masteryGaps.length > 0 || suggestions.length > 0;
+
+  if (!hasContent) {
+    return (
+      <div className="recommendations">
+        <h2 className="rec-title">Recommendations</h2>
+        <div className="rec-empty">
+          <span>✨</span>
+          <p>Enroll in courses to get personalised recommendations.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="recommendations">
-      <h2 className="section-title">💡 Personalized Recommendations</h2>
-      <p className="section-subtitle">
-        Based on your learning patterns and performance
-      </p>
+      <h2 className="rec-title">Recommendations</h2>
 
-      {/* Mastery Gaps */}
       {masteryGaps.length > 0 && (
-        <div className="recommendations-section">
-          <h3 className="subsection-title">Mastery Gaps</h3>
-          <div className="mastery-gaps">
-            {masteryGaps.map((gap) => (
-              <div key={gap.id} className="mastery-gap-card">
-                <div className="gap-header">
-                  <div className="gap-info">
-                    <h4 className="gap-topic">{gap.topic}</h4>
-                    <span className={`gap-status ${getStatusColor(gap.status)}`}>
-                      {getStatusText(gap.mastery)}
+        <div className="rec-section">
+          <h3 className="rec-sub-title">Needs Attention</h3>
+          <div className="rec-gaps-list">
+            {masteryGaps.map((gap) => {
+              const { label, cls } = getStatusLabel(gap.mastery);
+              return (
+                <div key={gap.id} className="rec-gap-item">
+                  <div className="rec-gap-info">
+                    <span className="rec-gap-name">{gap.topic}</span>
+                    {gap.moduleLabel && (
+                      <span className="rec-gap-module">{gap.moduleLabel}</span>
+                    )}
+                    <span className={`rec-gap-status ${cls}`}>
+                      {gap.severity === 'STRONG_REVIEW' ? 'Strongly ' : ''}{label}
                     </span>
                   </div>
-                  <div className="gap-mastery">
-                    <div className="mastery-circle">
-                      <svg width="60" height="60" viewBox="0 0 60 60">
-                        <circle
-                          cx="30"
-                          cy="30"
-                          r="25"
-                          fill="none"
-                          stroke="#e2e8f0"
-                          strokeWidth="5"
-                        />
-                        <circle
-                          cx="30"
-                          cy="30"
-                          r="25"
-                          fill="none"
-                          stroke={gap.mastery < 60 ? '#f56565' : '#ed8936'}
-                          strokeWidth="5"
-                          strokeDasharray={`${(gap.mastery / 100) * 157} 157`}
-                          strokeLinecap="round"
-                          transform="rotate(-90 30 30)"
-                        />
-                        <text
-                          x="30"
-                          y="30"
-                          textAnchor="middle"
-                          dy=".3em"
-                          fontSize="14"
-                          fontWeight="700"
-                          fill="#1a202c"
-                        >
-                          {gap.mastery}%
-                        </text>
-                      </svg>
-                    </div>
+                  <div className="rec-gap-bar-wrap">
+                    <div
+                      className={`rec-gap-bar-fill ${gap.mastery < 25 ? 'fill-red' : 'fill-orange'}`}
+                      style={{ width: `${gap.mastery}%` }}
+                    />
+                  </div>
+                  <div className="rec-gap-footer">
+                    <span className="rec-gap-pct">{gap.mastery}% progress</span>
+                    {gap.courseId && (
+                      <button
+                        className="rec-btn-go"
+                        onClick={() => onNavigate?.(gap.courseId)}
+                      >
+                        Go to Course →
+                      </button>
+                    )}
                   </div>
                 </div>
-                <button 
-                  className="btn-review"
-                  onClick={() => navigate(`/lessons/${gap.lessonId}`)}
-                >
-                  Review Topic →
-                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {suggestions.length > 0 && (
+        <div className="rec-section">
+          <h3 className="rec-sub-title">Suggested Next Steps</h3>
+          <div className="rec-suggestions">
+            {suggestions.map((s) => (
+              <div
+                key={s.id}
+                className={`rec-suggestion-item ${s.courseId ? 'clickable' : ''}`}
+                onClick={() => s.courseId && onNavigate?.(s.courseId)}
+                role={s.courseId ? 'button' : undefined}
+              >
+                <span className="rec-sug-icon">{s.icon}</span>
+                <span className="rec-sug-text">{s.text}</span>
+                {s.courseId && (
+                  <svg className="rec-sug-arrow" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                  </svg>
+                )}
               </div>
             ))}
           </div>
         </div>
       )}
-
-      {/* Suggested Topics */}
-      <div className="recommendations-section">
-        <h3 className="subsection-title">Suggested Next Topics</h3>
-        <div className="suggestions-list">
-          {suggestions.map((suggestion) => (
-            <div key={suggestion.id} className="suggestion-item">
-              <span className="suggestion-icon">{suggestion.icon}</span>
-              <span className="suggestion-text">{suggestion.text}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* AI Insight Badge */}
-      <div className="ai-insight">
-        <span className="ai-badge">🤖 AI-Powered Insights</span>
-        <p className="ai-text">
-          These recommendations are generated by analyzing your learning patterns,
-          quiz performance, and time spent on each topic.
-        </p>
-      </div>
     </div>
   );
 }

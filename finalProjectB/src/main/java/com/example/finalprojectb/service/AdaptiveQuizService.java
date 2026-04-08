@@ -36,7 +36,10 @@ public class AdaptiveQuizService {
     private LessonRepository lessonRepository;
 
     @Autowired
-    private ProficiencyService proficiencyService;
+    private ModuleRepository moduleRepository;
+
+    @Autowired
+    private EnrollmentRepository enrollmentRepository;
 
     private static final int MAX_QUESTIONS_PER_ROUND = 5;
 
@@ -47,6 +50,11 @@ public class AdaptiveQuizService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        // Block retake if the user has already fully passed this quiz
+        if (quizAttemptRepository.hasUserPassedQuiz(userId, quizId)) {
+            throw new RuntimeException("QUIZ_ALREADY_PASSED");
+        }
 
         // Check if the user has a previous failed attempt with passed rounds (for resume)
         String startDifficulty = "EASY";
@@ -70,9 +78,6 @@ public class AdaptiveQuizService {
         attempt.setStatus("IN_PROGRESS");
         QuizAttempt savedAttempt = quizAttemptRepository.save(attempt);
 
-        // Get ML prediction
-        MLPredictionResponseDTO prediction = proficiencyService.getPrediction(userId, quizId);
-
         // Fetch questions for the starting difficulty and shuffle them
         List<Question> startQuestions = questionRepository.findByQuizIdAndDifficultyLevel(quizId, startDifficulty);
         Collections.shuffle(startQuestions);
@@ -91,8 +96,6 @@ public class AdaptiveQuizService {
         response.setQuizTitle(quiz.getTitle());
         response.setCurrentDifficulty(startDifficulty);
         response.setQuestions(questionDTOs);
-        response.setMlPrediction(prediction.getSuccessProbability());
-        response.setMlRecommendation(prediction.getRecommendation());
         response.setResumedFromPreviousAttempt(resumed);
 
         return response;
@@ -168,6 +171,10 @@ public class AdaptiveQuizService {
 
                 // Update attempt
                 updateAttemptAsCompleted(attempt, true, dto.getTimeTakenSeconds());
+
+                // Update enrollment completion percentage
+                Long courseId = attempt.getQuiz().getModule().getCourse().getId();
+                updateEnrollmentCompletion(attempt.getUser().getId(), courseId);
             } else {
                 // Escalate to next difficulty
                 List<Question> nextQuestions = questionRepository
@@ -221,13 +228,32 @@ public class AdaptiveQuizService {
             updateAttemptAsCompleted(attempt, false, dto.getTimeTakenSeconds());
         }
 
-        // Recalculate ML prediction after this round
-        MLPredictionResponseDTO prediction = proficiencyService.getPrediction(
-                attempt.getUser().getId(), attempt.getQuiz().getId());
-        result.setMlPrediction(prediction.getSuccessProbability());
-        result.setMlRecommendation(prediction.getRecommendation());
-
         return result;
+    }
+
+    @Transactional
+    public void updateEnrollmentCompletion(Long userId, Long courseId) {
+        List<Module> modules = moduleRepository.findByCourseIdOrderByOrderIndexAsc(courseId);
+        List<Long> allQuizIds = modules.stream()
+                .flatMap(m -> quizRepository.findByModuleIdOrderByOrderIndexAsc(m.getId()).stream())
+                .map(Quiz::getId)
+                .collect(Collectors.toList());
+
+        if (allQuizIds.isEmpty()) return;
+
+        long passedCount = allQuizIds.stream()
+                .filter(qId -> quizAttemptRepository.hasUserPassedQuiz(userId, qId))
+                .count();
+
+        int completionPct = (int) ((passedCount * 100.0) / allQuizIds.size());
+
+        enrollmentRepository.findByUserIdAndCourseId(userId, courseId).ifPresent(enrollment -> {
+            enrollment.setCompletionPercentage((double) completionPct);
+            if (completionPct >= 100) {
+                enrollment.setStatus("COMPLETED");
+            }
+            enrollmentRepository.save(enrollment);
+        });
     }
 
     private void updateAttemptAsCompleted(QuizAttempt attempt, boolean passed, Integer timeTaken) {

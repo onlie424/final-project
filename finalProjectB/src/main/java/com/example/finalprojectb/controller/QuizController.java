@@ -4,8 +4,8 @@ import com.example.finalprojectb.DTO.*;
 import com.example.finalprojectb.repo.QuizAttemptRepository;
 import com.example.finalprojectb.service.AdaptiveQuizService;
 import com.example.finalprojectb.service.ModuleLockService;
-import com.example.finalprojectb.service.ProficiencyService;
 import com.example.finalprojectb.service.QuizService;
+import com.example.finalprojectb.service.RecommendationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -29,10 +30,10 @@ public class QuizController {
     private ModuleLockService moduleLockService;
 
     @Autowired
-    private ProficiencyService proficiencyService;
+    private QuizAttemptRepository quizAttemptRepository;
 
     @Autowired
-    private QuizAttemptRepository quizAttemptRepository;
+    private RecommendationService recommendationService;
 
     // ==================== ADMIN ENDPOINTS ====================
 
@@ -89,6 +90,15 @@ public class QuizController {
         return ResponseEntity.ok(quizzes);
     }
 
+    // Check if a user has fully passed a specific quiz
+    @GetMapping("/{quizId}/passed")
+    public ResponseEntity<Map<String, Boolean>> hasUserPassedQuiz(
+            @PathVariable Long quizId,
+            @RequestParam Long userId) {
+        boolean passed = quizAttemptRepository.hasUserPassedQuiz(userId, quizId);
+        return ResponseEntity.ok(Map.of("passed", passed));
+    }
+
     // ==================== ADAPTIVE QUIZ ENDPOINTS ====================
 
     // Start an adaptive quiz (returns EASY round questions)
@@ -118,15 +128,25 @@ public class QuizController {
         return ResponseEntity.ok(lockStatuses);
     }
 
-    // ==================== ML PREDICTION ====================
+    // ==================== RECOMMENDATIONS ====================
 
-    // Get ML prediction for a user on a specific quiz
-    @GetMapping("/{quizId}/prediction")
-    public ResponseEntity<MLPredictionResponseDTO> getPrediction(
-            @PathVariable Long quizId,
+    // Get personalised lesson recommendations for a user in a course
+    @GetMapping("/course/{courseId}/recommendations")
+    public ResponseEntity<DashboardRecommendationDTO> getRecommendations(
+            @PathVariable Long courseId,
             @RequestParam Long userId) {
-        MLPredictionResponseDTO prediction = proficiencyService.getPrediction(userId, quizId);
-        return ResponseEntity.ok(prediction);
+        return ResponseEntity.ok(recommendationService.getRecommendations(userId, courseId));
+    }
+
+    // Recalculate and persist enrollment completion for a user in a course
+    // Called when a user loads the classroom — fixes any users whose completion
+    // was not recorded due to the previous bug
+    @PostMapping("/course/{courseId}/sync-completion")
+    public ResponseEntity<Void> syncCompletion(
+            @PathVariable Long courseId,
+            @RequestParam Long userId) {
+        adaptiveQuizService.updateEnrollmentCompletion(userId, courseId);
+        return ResponseEntity.ok().build();
     }
 
     // ==================== ATTEMPT HISTORY ====================

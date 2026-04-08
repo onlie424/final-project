@@ -32,4 +32,15 @@ public interface QuestionResponseRepository extends JpaRepository<QuestionRespon
     // ML Feature 3: Average correctness for a specific quiz across ALL students
     @Query("SELECT AVG(CASE WHEN qr.isCorrect = true THEN 1.0 ELSE 0.0 END) FROM QuestionResponse qr WHERE qr.attempt.quiz.id = :quizId")
     Double findSkillMeanCorrect(@Param("quizId") Long quizId);
+
+    // Recommendation: failed responses with a linked lesson, from completed attempts
+    @Query("SELECT qr FROM QuestionResponse qr " +
+           "WHERE qr.attempt.user.id = :userId " +
+           "AND qr.attempt.quiz.id IN :quizIds " +
+           "AND qr.isCorrect = false " +
+           "AND qr.attempt.status = 'COMPLETED' " +
+           "AND qr.question.lesson IS NOT NULL")
+    List<QuestionResponse> findFailedResponsesWithLessons(
+            @Param("userId") Long userId,
+            @Param("quizIds") List<Long> quizIds);
 }
