@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
+@org.springframework.core.annotation.Order(1)
 public class DataInitialiser implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(DataInitialiser.class);

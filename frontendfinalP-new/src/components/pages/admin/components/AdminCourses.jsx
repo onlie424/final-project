@@ -31,7 +31,7 @@ function AdminCourses({ courses, onPublish, onUnpublish, onDelete }) {
                 <th>Course Name</th>
                 <th>Category</th>
                 <th>Difficulty</th>
-                <th>Lessons</th>
+                
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -64,7 +64,7 @@ function AdminCourses({ courses, onPublish, onUnpublish, onDelete }) {
                       {course.difficulty || 'N/A'}
                     </span>
                   </td>
-                  <td>{course.totalLessons || 0}</td>
+                  
                   <td>
                     <span className={`status-badge ${course.isPublished ? 'published' : 'draft'}`}>
                       {course.isPublished ? 'Published' : 'Draft'}

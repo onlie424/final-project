@@ -304,11 +304,6 @@ export default function Dashboard() {
               <div className="db-stat-val">{overallProgress}%</div>
               <div className="db-stat-lbl">Avg Progress</div>
             </div>
-            <div className="db-stat-card">
-              <div className="db-stat-icon">🔥</div>
-              <div className="db-stat-val">{user?.loginStreak || 0}</div>
-              <div className="db-stat-lbl">Day Streak</div>
-            </div>
           </div>
         </div>
 

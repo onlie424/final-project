@@ -29,13 +29,7 @@ function AdminOverview({ stats, courses, setActiveTab, onRefresh }) {
             <p>Drafts</p>
           </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-icon lessons">📖</div>
-          <div className="stat-info">
-            <h3>{stats.totalLessons}</h3>
-            <p>Total Lessons</p>
-          </div>
-        </div>
+        
         <div className="stat-card">
           <div className="stat-icon users">👥</div>
           <div className="stat-info">
@@ -77,7 +71,7 @@ function AdminOverview({ stats, courses, setActiveTab, onRefresh }) {
                   <th>Course Name</th>
                   <th>Category</th>
                   <th>Status</th>
-                  <th>Lessons</th>
+
                 </tr>
               </thead>
               <tbody>
@@ -103,7 +97,7 @@ function AdminOverview({ stats, courses, setActiveTab, onRefresh }) {
                         {course.isPublished ? 'Published' : 'Draft'}
                       </span>
                     </td>
-                    <td>{course.totalLessons || 0}</td>
+                    
                   </tr>
                 ))}
               </tbody>
@@ -112,28 +106,7 @@ function AdminOverview({ stats, courses, setActiveTab, onRefresh }) {
         )}
       </div>
 
-      {/* Quick Actions */}
-      <div className="quick-actions">
-        <h2>Quick Actions</h2>
-        <div className="actions-grid">
-          <button className="action-card" onClick={() => navigate('/admin/courses/create')}>
-            <span className="action-icon">➕</span>
-            <span className="action-label">Add Course</span>
-          </button>
-          <button className="action-card" onClick={() => navigate('/admin/modules/create')}>
-            <span className="action-icon">📦</span>
-            <span className="action-label">Add Module</span>
-          </button>
-          <button className="action-card" onClick={() => navigate('/admin/lessons/create')}>
-            <span className="action-icon">📄</span>
-            <span className="action-label">Add Lesson</span>
-          </button>
-          <button className="action-card" onClick={onRefresh}>
-            <span className="action-icon">🔄</span>
-            <span className="action-label">Refresh Data</span>
-          </button>
-        </div>
-      </div>
+      
     </>
   );
 }

@@ -36,9 +36,6 @@ public class Quiz {
     @Column(name = "passing_score")
     private Integer passingScore = 70; // Percentage to pass
 
-    @Column(name = "time_limit_minutes")
-    private Integer timeLimitMinutes; // null = no time limit
-
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

@@ -96,10 +96,6 @@ function WelcomePage() {
               <span className="float-text">Quiz Complete!</span>
               <span className="float-score">95%</span>
             </div>
-            <div className="hero-card hero-card-streak">
-              <span className="streak-fire">🔥</span>
-              <span className="streak-text">7 Day Streak</span>
-            </div>
           </div>
         </div>
       </section>
@@ -130,7 +126,7 @@ function WelcomePage() {
               </svg>
             </div>
             <h3>Track Your Progress</h3>
-            <p>See how far you've come with detailed progress tracking and streak counters.</p>
+            <p>See how far you've come with detailed progress tracking.</p>
           </div>
 
           <div className="feature-card">

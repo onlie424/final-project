@@ -12,5 +12,4 @@ public class AuthResponse {
     private String fullName;
     private User.Role role;
     private Long userId;
-    private int loginStreak;
 }

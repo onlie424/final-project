@@ -8,5 +8,4 @@ public class CreateQuizDTO {
     private String title;
     private String description;
     private Integer passingScore;
-    private Integer timeLimitMinutes;
 }

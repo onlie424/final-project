@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 
 @Service
 public class AuthService {
@@ -39,7 +38,7 @@ public class AuthService {
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
 
-        return new AuthResponse(token, user.getEmail(), user.getFullName(), user.getRole(), user.getId(), user.getLoginStreak());
+        return new AuthResponse(token, user.getEmail(), user.getFullName(), user.getRole(), user.getId());
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -54,6 +53,6 @@ public class AuthService {
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole());
 
-        return new AuthResponse(token, user.getEmail(), user.getFullName(), user.getRole(), user.getId(), user.getLoginStreak());
+        return new AuthResponse(token, user.getEmail(), user.getFullName(), user.getRole(), user.getId());
     }
 }

@@ -10,6 +10,5 @@ public class QuizDetailDTO {
     private String title;
     private String description;
     private Integer passingScore;
-    private Integer timeLimitMinutes;
     private List<QuestionDTO> questions;
 }

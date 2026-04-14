@@ -26,7 +26,6 @@ function AdminDashboard() {
     totalCourses: 0,
     publishedCourses: 0,
     draftCourses: 0,
-    totalLessons: 0,
     totalUsers: 0,
     adminCount: 0,
     userCount: 0,
@@ -57,13 +56,11 @@ function AdminDashboard() {
 
       const publishedCount = coursesData.filter(c => c.isPublished).length;
       const draftCount = coursesData.filter(c => !c.isPublished).length;
-      const totalLessonsCount = coursesData.reduce((sum, c) => sum + (c.totalLessons || 0), 0);
 
       setStats({
         totalCourses: coursesData.length,
         publishedCourses: publishedCount,
         draftCourses: draftCount,
-        totalLessons: totalLessonsCount,
         totalUsers: userStats.totalUsers || 0,
         adminCount: userStats.adminCount || 0,
         userCount: userStats.userCount || 0,

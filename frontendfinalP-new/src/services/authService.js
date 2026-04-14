@@ -25,7 +25,6 @@ export const register = async (fullName, email, password) => {
         email: response.data.email,
         fullName: response.data.fullName,
         role: response.data.role,
-        loginStreak: response.data.loginStreak || 1
       };
 
       console.log('Saving to localStorage:', userData);
@@ -77,7 +76,6 @@ export const login = async (email, password) => {
         email: response.data.email,
         fullName: response.data.fullName,
         role: response.data.role,
-        loginStreak: response.data.loginStreak || 0
       };
 
       console.log('Saving to localStorage:', userData);
