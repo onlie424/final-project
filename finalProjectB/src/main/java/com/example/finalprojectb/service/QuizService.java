@@ -48,7 +48,7 @@ public class QuizService {
         quiz.setTitle(dto.getTitle());
         quiz.setDescription(dto.getDescription());
         quiz.setPassingScore(dto.getPassingScore());
-        quiz.setTimeLimitMinutes(dto.getTimeLimitMinutes());
+
 
         // Set order index based on existing quizzes in the module
         List<Quiz> existingQuizzes = quizRepository.findByModuleIdOrderByOrderIndexAsc(module.getId());
@@ -263,7 +263,7 @@ public class QuizService {
         dto.setTitle(quiz.getTitle());
         dto.setDescription(quiz.getDescription());
         dto.setPassingScore(quiz.getPassingScore());
-        dto.setTimeLimitMinutes(quiz.getTimeLimitMinutes());
+
         dto.setQuestionCount(quiz.getQuestions().size());
         return dto;
     }

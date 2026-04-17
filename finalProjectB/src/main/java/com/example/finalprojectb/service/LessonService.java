@@ -143,7 +143,6 @@ public class LessonService {
         dto.setTitle(quiz.getTitle());
         dto.setDescription(quiz.getDescription());
         dto.setPassingScore(quiz.getPassingScore());
-        dto.setTimeLimitMinutes(quiz.getTimeLimitMinutes());
         dto.setQuestionCount(quiz.getQuestions().size());
         return dto;
     }
