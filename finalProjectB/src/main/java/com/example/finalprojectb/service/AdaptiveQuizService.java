@@ -59,7 +59,7 @@ public class AdaptiveQuizService {
         // Check if the user has a previous failed attempt with passed rounds (for resume)
         String startDifficulty = "EASY";
         boolean resumed = false;
-        java.util.Optional<QuizAttempt> lastResumable = quizAttemptRepository.findLastResumableAttempt(userId, quizId);
+        Optional<QuizAttempt> lastResumable = quizAttemptRepository.findLastResumableAttempt(userId, quizId);
         if (lastResumable.isPresent()) {
             String highestPassed = lastResumable.get().getHighestPassedDifficulty();
             String nextAfterPassed = getNextDifficulty(highestPassed);

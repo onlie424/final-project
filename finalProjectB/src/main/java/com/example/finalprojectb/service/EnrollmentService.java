@@ -114,6 +114,17 @@ public class EnrollmentService {
     }
 
     /**
+     * Update lastAccessed timestamp when a student opens a course
+     */
+    @Transactional
+    public void touchLastAccessed(Long userId, Long courseId) {
+        enrollmentRepository.findByUserIdAndCourseId(userId, courseId).ifPresent(enrollment -> {
+            enrollment.setLastAccessed(LocalDateTime.now());
+            enrollmentRepository.save(enrollment);
+        });
+    }
+
+    /**
      * Unenroll user from course
      */
     @Transactional

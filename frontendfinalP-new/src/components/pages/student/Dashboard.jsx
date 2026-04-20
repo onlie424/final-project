@@ -60,6 +60,7 @@ export default function Dashboard() {
               enrollmentId: enrollment.id,
               completionPercentage: Math.round(progress),
               status: enrollment.status || 'IN_PROGRESS',
+              lastAccessed: enrollment.lastAccessed || null,
             };
           } catch {
             return null;
@@ -95,15 +96,17 @@ export default function Dashboard() {
       (c) => c.status === 'COMPLETED' || c.completionPercentage >= 100
     ).length;
 
-    const inProgress = courses.filter(
-      (c) => c.completionPercentage > 0 && c.completionPercentage < 100
+    // Pick the most recently accessed non-completed course as the current focus
+    const incomplete = courses.filter(
+      (c) => c.status !== 'COMPLETED' && c.completionPercentage < 100
     );
+    const withAccess = incomplete.filter((c) => c.lastAccessed != null);
     const focusCourse =
-      inProgress.length > 0
-        ? inProgress.reduce((max, c) =>
-            c.completionPercentage > max.completionPercentage ? c : max
+      withAccess.length > 0
+        ? withAccess.reduce((latest, c) =>
+            new Date(c.lastAccessed) > new Date(latest.lastAccessed) ? c : latest
           )
-        : courses[0];
+        : incomplete[0] ?? null;
 
     const activities = courses.map((course) => {
       if (course.completionPercentage >= 100 || course.status === 'COMPLETED') {

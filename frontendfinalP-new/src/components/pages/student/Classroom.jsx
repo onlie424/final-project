@@ -135,6 +135,20 @@ export default function Classroom() {
       setLoading(true);
       setError(null);
 
+      // Record that this student has accessed this course now
+      if (user?.userId) {
+        try {
+          const stored = localStorage.getItem('user');
+          const token = stored ? JSON.parse(stored).token : null;
+          await fetch(
+            `http://localhost:8080/api/enrollments/touch?userId=${user.userId}&courseId=${courseId}`,
+            { method: 'POST', headers: { Authorization: `Bearer ${token}` } }
+          );
+        } catch (_) {
+          // non-critical — dashboard will fall back gracefully
+        }
+      }
+
       const courseData = await courseService.getCourseById(courseId, user?.userId);
       setCourse(courseData);
 

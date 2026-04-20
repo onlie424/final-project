@@ -94,6 +94,18 @@ public class EnrollmentController {
         return ResponseEntity.ok(enrollment);
     }
 
+    /**
+     * Update lastAccessed when a student opens a course
+     * POST /api/enrollments/touch?userId=X&courseId=Y
+     */
+    @PostMapping("/touch")
+    public ResponseEntity<Void> touchLastAccessed(
+            @RequestParam Long userId,
+            @RequestParam Long courseId) {
+        enrollmentService.touchLastAccessed(userId, courseId);
+        return ResponseEntity.ok().build();
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> handleException(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());

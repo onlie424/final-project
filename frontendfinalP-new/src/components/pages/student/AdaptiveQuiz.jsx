@@ -94,6 +94,7 @@ export default function AdaptiveQuiz() {
     }
 
     const timeTaken = startTime ? Math.round((Date.now() - startTime) / 1000) : 0;
+    const timePerQuestion = questions.length > 0 ? Math.round(timeTaken / questions.length) : 0;
 
     // Include ALL questions — unanswered ones are sent as null so they count as incorrect
     const answerList = questions.map((q) => {
@@ -102,6 +103,7 @@ export default function AdaptiveQuiz() {
         questionId: q.id,
         selectedOptionId: answer !== undefined && typeof answer === 'number' ? answer : null,
         userAnswer: answer !== undefined && typeof answer === 'string' ? answer : null,
+        timeSpentSeconds: timePerQuestion,
       };
     });
 
