@@ -1,9 +1,99 @@
-# Your project name here
+# BrainPath — Personalised Education Platform
 
-## Information about this repository
+A full-stack web application built as a final year project (CO3201) at the University of Leicester. BrainPath delivers personalised learning through an adaptive quiz system and recommendation engine, helping students identify and close their knowledge gaps.
 
-This is the repository that you are going to use **individually** for developing your project. Please use the resources provided in the module to learn about **plagiarism** and how plagiarism awareness can foster your learning.
+---
 
-Regarding the use of this repository, once a feature (or part of it) is developed and **working** or parts of your system are integrated and **working**, define a commit and push it to the remote repository. You may find yourself making a commit after a productive hour of work (or even after 20 minutes!), for example. Choose commit message wisely and be concise.
+## Project Structure
 
-Please choose the structure of the contents of this repository that suits the needs of your project but do indicate in this file where the main software artefacts are located.
+```
+onnn1/
+├── finalProjectB/          # Spring Boot backend (Java)
+└── frontendfinalP-new/     # React frontend (Vite)
+```
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Backend | Spring Boot, Spring Security, JWT |
+| Frontend | React (Vite), React Router |
+| Database | MySQL via JPA / Hibernate |
+| Build Tools | Gradle (backend), npm (frontend) |
+
+---
+
+## Core Features
+
+- **Student authentication** — register, log in, JWT-secured routes
+- **Course enrolment** — students browse and enrol in available courses
+- **Video-based lessons** — content delivered via embedded YouTube videos
+- **Adaptive quiz system** — three difficulty tiers (Easy, Medium, Hard); students must pass each tier to progress. Questions are randomly sampled from a large question bank on every attempt so no two sittings are identical
+- **Quiz resume** — if a student passes a tier but fails the next, their progress is saved and they can continue from where they left off
+- **Personalised recommendations** — failed questions are mapped to the specific lesson that covers that topic; the system recommends exactly what to re-study
+- **Student dashboard** — shows enrolled courses, current focus course, mastery gaps, and next steps
+- **Admin dashboard** — create and delete courses, modules, lessons, and quizzes; assign each question to a lesson for accurate recommendations
+
+---
+
+## Running the Project
+
+### Backend
+
+Requirements: Java 17+, MySQL running locally
+
+```bash
+cd finalProjectB
+./gradlew bootRun
+```
+
+The backend runs on `http://localhost:8080`.
+
+### Frontend
+
+Requirements: Node.js 18+
+
+```bash
+cd frontendfinalP-new
+npm install
+npm run dev
+```
+
+The frontend runs on `http://localhost:3000`.
+
+---
+
+## Repository Layout (Backend)
+
+```
+finalProjectB/src/main/java/com/example/finalprojectb/
+├── controller/     # REST controllers (auth, course, module, lesson, quiz, dashboard)
+├── service/        # Business logic (adaptive quiz, recommendations, enrolment)
+├── model/          # JPA entities
+├── repo/           # Spring Data repositories
+├── DTO/            # Data Transfer Objects
+├── security/       # JWT filter, user details service
+└── Config/         # Spring Security and CORS configuration
+```
+
+---
+
+## Running Tests
+
+```bash
+# Backend unit tests
+cd finalProjectB
+./gradlew test
+
+# Frontend tests
+cd frontendfinalP-new
+npm test
+```
+
+---
+
+## Author
+
+Onlie Noel — University of Leicester, CO3201 Final Year Project, 2025/26
