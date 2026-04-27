@@ -12,24 +12,20 @@ export const courseService = {
     const params = userId ? { userId } : {};
     const response = await axios.get(`/api/courses/${courseId}`, { params });
     const courseData = response.data;
-    console.log('Course data from API:', courseData);
 
     // Fetch modules for this course
     try {
       const modulesResponse = await axios.get(`/api/modules/course/${courseId}`);
       const modules = modulesResponse.data || [];
-      console.log('Modules from API:', modules);
 
       // Fetch lessons for each module
       const modulesWithLessons = await Promise.all(
         modules.map(async (module) => {
           // Try both 'id' and 'moduleId' field names
           const moduleId = module.id || module.moduleId;
-          console.log(`Fetching lessons for module ${moduleId}:`, module);
 
           try {
             const lessonsResponse = await axios.get(`/api/lessons/module/${moduleId}`);
-            console.log(`Lessons for module ${moduleId}:`, lessonsResponse.data);
             return {
               ...module,
               id: moduleId,
@@ -53,7 +49,6 @@ export const courseService = {
       });
 
       courseData.modules = modulesWithLessons;
-      console.log('Final course data with modules and lessons:', courseData);
     } catch (err) {
       console.error('Error fetching modules:', err);
       courseData.modules = courseData.modules || [];

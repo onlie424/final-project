@@ -5,15 +5,3 @@ export async function fetchAvailableCourses(userId) {
   if (!res.ok) throw new Error("Failed to load available courses");
   return res.json();
 }
-
-// export async function fetchProgress(userId) {
-//   const res = await fetch(`${BASE_URL}/${userId}/progress`);
-//   if (!res.ok) throw new Error("Failed to load progress");
-//   return res.json();
-// }
-
-// export async function fetchRecommendations(userId) {
-//   const res = await fetch(`${BASE_URL}/${userId}/recommendations`);
-//   if (!res.ok) throw new Error("Failed to load recommendations");
-//   return res.json();
-// }

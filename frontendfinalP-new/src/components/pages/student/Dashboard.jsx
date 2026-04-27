@@ -8,6 +8,7 @@ import CurrentFocus from '../../dashboard/CurrentFocus';
 import ProgressOverview from '../../dashboard/ProgressOverview';
 import ActivityFeed from '../../dashboard/ActivityFeed';
 import Recommendations from '../../dashboard/Recommendations';
+import { getInitials } from '../../../utils/helpers';
 import '../../../styles/Dashboard.css';
 
 export default function Dashboard() {
@@ -78,7 +79,7 @@ export default function Dashboard() {
           )
         : [];
 
-      computeDashboardData(valid, allCoursesData || [], recResults);
+      computeDashboardData(valid, recResults);
     } catch (err) {
       console.error('Error fetching dashboard:', err);
       setError('Failed to load dashboard data.');
@@ -87,7 +88,7 @@ export default function Dashboard() {
     }
   };
 
-  const computeDashboardData = (courses, _allCoursesData, recResults = []) => {
+  const computeDashboardData = (courses, recResults = []) => {
     if (!courses.length) return;
 
     const totalProgress = courses.reduce((s, c) => s + (c.completionPercentage || 0), 0);
@@ -194,11 +195,6 @@ export default function Dashboard() {
     } finally {
       setEnrollingCourseId(null);
     }
-  };
-
-  const getInitials = (name) => {
-    if (!name) return 'U';
-    return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
   if (loading) {
