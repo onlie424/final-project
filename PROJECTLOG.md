@@ -99,3 +99,12 @@ Please regularly update this file to record your project progress. You should be
 - Updated the dashboard Current Focus logic: when a student clicks into a course and enters the classroom, that course is now correctly highlighted as the current focus.
 - Created unit test files for the quiz service and dashboard service (backend).
 - Created frontend test files covering login, registration, and the recommendations system.
+
+## Week 18 [w/c 27 Apr 2026]
+
+- Added unit tests for `AuthService` and `EnrollmentService` to broaden backend test coverage.
+- Configured JaCoCo in `build.gradle` to generate test coverage reports with a 70% branch coverage minimum.
+- Cleaned up backend: removed unused commented-out reorder endpoints from `LessonController` and `ModuleController`, and removed the `loginStreak` field from the `User` model (feature was not implemented).
+- Improved quiz review UX: replaced the question-mark icon on incorrect answer explanations with a clear "Explanation:" label for better student readability.
+- Refactored frontend auth and dashboard services: cleaned up `authService`, `courseService`, `dashboardAPI`, `MyCourses`, and `Dashboard` components.
+- Added a scope preamble to the User Stories document clarifying which features were deferred during iterative development, with references to the relevant dissertation sections.
