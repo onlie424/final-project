@@ -1,6 +1,6 @@
 # BrainPath — Personalised Education Platform
 
-A full-stack web application built as a final year project (CO3201) at the University of Leicester. BrainPath delivers personalised learning through an adaptive quiz system and recommendation engine, helping students identify and close their knowledge gaps.
+A full-stack web application built as a final year project (CO3204) at the University of Leicester. BrainPath delivers personalised learning through an adaptive quiz system and recommendation engine, helping students identify and close their knowledge gaps.
 
 ---
 
@@ -96,4 +96,4 @@ npm test
 
 ## Author
 
-Onlie Noel — University of Leicester, CO3201 Final Year Project, 2025/26
+Onlie Noel — University of Leicester, CO3204 Final Year Project, 2025/26
