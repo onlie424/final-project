@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-import { isAuthenticated, isAdmin, isUser, getUserRole, getCurrentUser } from './services/authService';
+import { isAuthenticated, isAdmin, isUser, getUserRole } from './services/authService';
 
 import Login from './components/pages/auth/login';
 import Register from './components/pages/auth/registration';
@@ -22,8 +22,6 @@ function ProtectedRoute({ children }) {
   useEffect(() => {
     const checkAuth = () => {
       const auth = isAuthenticated();
-      console.log('ProtectedRoute - isAuthenticated:', auth);
-      console.log('ProtectedRoute - getCurrentUser:', getCurrentUser());
       setAuthenticated(auth);
       setLoading(false);
     };
@@ -48,9 +46,6 @@ function AdminRoute({ children }) {
     const checkAuth = () => {
       const auth = isAuthenticated();
       const adminStatus = isAdmin();
-      console.log('AdminRoute - isAuthenticated:', auth);
-      console.log('AdminRoute - isAdmin:', adminStatus);
-      console.log('AdminRoute - getUserRole:', getUserRole());
       setAuthenticated(auth);
       setIsAdminUser(adminStatus);
       setLoading(false);
@@ -80,9 +75,6 @@ function UserRoute({ children }) {
     const checkAuth = () => {
       const auth = isAuthenticated();
       const userStatus = isUser();
-      console.log('UserRoute - isAuthenticated:', auth);
-      console.log('UserRoute - isUser:', userStatus);
-      console.log('UserRoute - getUserRole:', getUserRole());
       setAuthenticated(auth);
       setIsRegularUser(userStatus);
       setLoading(false);
@@ -109,12 +101,8 @@ function RootPathHandler() {
   
   useEffect(() => {
     const determineDestination = () => {
-      console.log('RootPathHandler - Checking authentication...');
-      
       if (isAuthenticated()) {
         const role = getUserRole();
-        console.log('RootPathHandler - User authenticated, role:', role);
-        
         if (role === 'ADMIN') {
           setDestination('/admin/dashboard');
         } else if (role === 'USER') {
@@ -123,7 +111,6 @@ function RootPathHandler() {
           setDestination('/user/dashboard'); // Fallback
         }
       } else {
-        console.log('RootPathHandler - User not authenticated, showing welcome page');
         setDestination('welcome');
       }
       
