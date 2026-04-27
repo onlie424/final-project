@@ -28,10 +28,6 @@ public class User {
     @Column(nullable = false)
     private Role role = Role.USER;
 
-    @Column(name = "login_streak", nullable = false)
-    private Integer loginStreak = 0;
-
-
     public enum Role {
         USER, ADMIN
     }

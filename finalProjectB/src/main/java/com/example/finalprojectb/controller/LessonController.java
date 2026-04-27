@@ -60,14 +60,6 @@ public class LessonController {
         return ResponseEntity.noContent().build();
     }
 
-//    // Reorder lessons
-//    @PutMapping("/reorder")
-//    @PreAuthorize("hasRole('ADMIN')")
-//    public ResponseEntity<Void> reorderLessons(@RequestBody List<LessonDTO> lessons) {
-//        lessonService.reorderLessons(lessons);
-//        return ResponseEntity.ok().build();
-//    }
-
     // Exception handler
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> handleException(RuntimeException e) {

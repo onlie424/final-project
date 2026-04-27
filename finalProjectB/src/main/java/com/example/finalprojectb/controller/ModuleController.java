@@ -65,14 +65,6 @@ public class ModuleController {
         moduleService.deleteModule(id);
         return ResponseEntity.noContent().build();
     }
-//
-//    // Reorder modules
-//    @PutMapping("/reorder")
-//    @PreAuthorize("hasRole('ADMIN')")
-//    public ResponseEntity<Void> reorderModules(@RequestBody List<ModuleDTO> modules) {
-//        moduleService.reorderModules(modules);
-//        return ResponseEntity.ok().build();
-//    }
 
     // Exception handler
     @ExceptionHandler(RuntimeException.class)
